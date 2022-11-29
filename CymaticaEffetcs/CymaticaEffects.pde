@@ -1,54 +1,25 @@
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.effects.*;
-PGraphics actual;
 
+PGraphics actual;
 ArrayList<BezierTrail> bts = new ArrayList<BezierTrail>();
 ArrayList<LaserLine> las = new ArrayList<LaserLine>();
 ArrayList<HorizLine> hTrails = new ArrayList<HorizLine>();
 int timeSinceLastB = 0;
 int timeSinceLastL = 0;
 int timeSinceLastH = 0;
-
-
-
 Minim minim;
 AudioPlayer s;
 FFT fftl, fftr, fftm;
 AudioMetaData meta;
-int beat = 0;
-
-float kickSize, snareSize, hatSize;
-
-class BeatListener implements AudioListener
-{
-  private BeatDetect beat;
-  private AudioPlayer source;
-
-  BeatListener(BeatDetect beat, AudioPlayer source)
-  {
-    this.source = source;
-    this.source.addListener(this);
-    this.beat = beat;
-  }
-
-  void samples(float[] samps)
-  {
-    beat.detect(source.mix);
-  }
-
-  void samples(float[] sampsL, float[] sampsR)
-  {
-    beat.detect(source.mix);
-  }
-}
 
 void setup() {
   textSize(1000);
   fullScreen(P3D);
   minim = new Minim(this);
   actual = createGraphics(width,height);
-  s = minim.loadFile("1-02 Massif.mp3", 4096);
+  s = minim.loadFile("/Users/isaiahdesrosiers/Downloads/1158117_ColBreakz---Crystallize.mp3", 4096);
   fftl = new FFT( s.bufferSize(), s.sampleRate() );
   fftr = new FFT( s.bufferSize(), s.sampleRate() );
   fftm = new FFT( s.bufferSize(), s.sampleRate() );
@@ -58,7 +29,7 @@ void setup() {
   meta = s.getMetaData();
   println(meta.length());
   s.play();
-  //s.setGain(-40);
+  s.setGain(-40);
 }
 
 void draw() {
@@ -189,6 +160,9 @@ void draw() {
       color p = actual.get(ix,iy);
       strokeCap(ROUND);
       stroke(p);
+      if (ix <= 400 && iy >= height - 50){
+        continue;
+      }
       strokeWeight(weight);
       //Spikes
       //line(ix-random(-reach,reach),iy-random(-reach,reach),ix+random(-reach,reach),iy+random(-reach,reach));
@@ -201,8 +175,8 @@ void draw() {
       //line(ix-map(noise(ix,iy,(float)millis()/1000),0,1,-reach,reach),iy-map(noise(ix,iy,(float)millis()/1000),0,1,-reach,reach),ix+map(noise(ix,iy,(float)millis()/1000),0,1,-reach,reach),iy+map(noise(ix,iy,(float)millis()/1000),0,1,-reach,reach));
       
       //Noise Glitch
-      //line(ix,iy-map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),ix,iy+map(noise(ix,iy,(float)millis()/1000),0,1,0,reach));
-      //line(ix-map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),iy,ix+map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),iy);
+      line(ix,iy-map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),ix,iy+map(noise(ix,iy,(float)millis()/1000),0,1,0,reach));
+      line(ix-map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),iy,ix+map(noise(ix,iy,ix+(float)millis()/1000),0,1,0,reach),iy);
       
       //line(ix,iy,ix+reach,iy+reach);
       
@@ -214,12 +188,11 @@ void draw() {
       //point(ix + random(-reach,reach),iy + random(-reach,reach));
     }
   }
-  fill(255);
-  textSize(map(s.mix.level(),0,1,1,1000));
-  textAlign(CENTER);
-  text(meta.title(),width/2,height/2);
-  fill(0,255);
-  rect(0,height,50,100);
+  //fill(255);
+  //textSize(map(s.mix.level(),0,1,1,1000));
+  //textAlign(CENTER);
+  //text(meta.title(),width/2,height/2);
+  //fill(0,255);
   fill(255);
   textSize(50);
   textAlign(LEFT,BOTTOM);
