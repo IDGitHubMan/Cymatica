@@ -18,7 +18,7 @@ boolean initial = true;
 boolean playlistSelected = false;
 
 void settings() {
-  fullScreen();
+  fullScreen(P3D);
 }
 
 void setup() {
@@ -43,7 +43,6 @@ void setup() {
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
   cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100);
   cp5.addGroup("otherPlayers").setPosition(width-300,height/2).setSize(200,20);
-  cp5.addScrollableList("list").setPosition(0,10).setWidth(200).hide();
 }
 
 void draw() {
@@ -75,16 +74,22 @@ void draw() {
 }
 
 void controlEvent(ControlEvent event) {
-  println("Triggered by: " + event.getName());
   if (event.getName() == "playlistSelector") {
     JSONObject ob =  (JSONObject) json.getJSONArray("playlists").get((int)cp5.get(ScrollableList.class,"playlistSelector").getValue());
     String title = ob.getString("name");
     print(title);
-    p = new Player(cp5, minim, title, ob);
+    if (p != null && p.playing != null){
+      p.playing.pause();
+    }
+    p = new Player(cp5, minim, title, json, (int) cp5.get(ScrollableList.class,"playlistSelector").getValue());
     playlistSelected = true;
     moveThings();
   } else if (event.getName() == "makePlaylist" || event.getName() == "playlistName") {
+    if (p != null && p.playing != null){
+      p.playing.pause();
+    }
     String name = cp5.get(Textfield.class, "playlistName").getText();
+    cp5.get(ScrollableList.class,"playlistSelector").addItem(name,json.getJSONArray("playlists").size());
     JSONObject newPlaylist = new JSONObject();
     JSONArray songPaths = new JSONArray();
     JSONArray visSettings = new JSONArray();
@@ -93,7 +98,8 @@ void controlEvent(ControlEvent event) {
     newPlaylist.put("settings", visSettings);
     json.getJSONArray("playlists").append(newPlaylist);
     saveJSONObject(json, "playlists.json");
-    p = new Player(cp5, minim, name, newPlaylist);
+    p.playing.pause();
+    p = new Player(cp5, minim, name, json,json.getJSONArray("playlists").size());
     playlistSelected = true;
     moveThings();
   }
