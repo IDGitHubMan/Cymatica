@@ -105,7 +105,7 @@ public class Player {
       if (playing != null) {
         if (!playing.isPlaying()) {
           songNumber += 1;
-          if (songNumber > songList.size()) {
+          if (songNumber >= songList.size()) {
             songNumber = 0;
           }
           println(songNumber);
@@ -116,8 +116,8 @@ public class Player {
     }
     stroke(255);
     fill(255);
-    textAlign(CENTER, TOP);
-    text(n, width/2, 0);
+    textAlign(RIGHT, TOP);
+    text(n, width, 0);
     if (messageTimer > 50) {
       incompatible = false;
     }
