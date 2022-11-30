@@ -42,7 +42,7 @@ void setup() {
     .getCaptionLabel()
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
   cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100);
-  cp5.addGroup("otherPlayers").setPosition(width-300,height/2).setSize(200,20);
+  cp5.addGroup("otherPlayers").setPosition(width-300,height/2).setLabel("Other Players").setSize(200,20).hide();
 }
 
 void draw() {
@@ -84,6 +84,7 @@ void controlEvent(ControlEvent event) {
     p = new Player(cp5, minim, title, json, (int) cp5.get(ScrollableList.class,"playlistSelector").getValue());
     playlistSelected = true;
     moveThings();
+    cp5.get(Group.class,"otherPlayers").show();
   } else if (event.getName() == "makePlaylist" || event.getName() == "playlistName") {
     if (p != null && p.playing != null){
       p.playing.pause();
