@@ -99,7 +99,9 @@ void controlEvent(ControlEvent event) {
     newPlaylist.put("settings", visSettings);
     json.getJSONArray("playlists").append(newPlaylist);
     saveJSONObject(json, "playlists.json");
-    p.playing.pause();
+    if (p != null && p.playing != null){
+      p.playing.pause();
+    }
     p = new Player(cp5, minim, name, json,json.getJSONArray("playlists").size());
     playlistSelected = true;
     moveThings();

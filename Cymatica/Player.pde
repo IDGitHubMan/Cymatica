@@ -74,9 +74,11 @@ public class Player {
       playlistObj.put("songs", songList);
       data.getJSONArray("playlists").setJSONObject(number, playlistObj);
       saveJSONObject(data, "playlists.json");
-      playing.pause();
-      playing = a;
-      playing.play();
+      if (playing != null){
+        playing.pause();
+        playing = a;
+        playing.play(0);
+      }
     }
 
     catch (NullPointerException e) {
@@ -95,7 +97,9 @@ public class Player {
   void controlEvent(ControlEvent e) {
     println(e.getName());
     if (e.getName().contains("play")){
-      playing.pause();
+      if (playing != null){
+        playing.pause();
+      }
       playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       playing.play();
     }
