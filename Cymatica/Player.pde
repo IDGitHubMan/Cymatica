@@ -34,8 +34,8 @@ public class Player {
       ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
       cp5.addGroup(String.valueOf(i+1)).setGroup("list").setPosition(0,20 + i*60).setWidth(200);
       cp5.addTextlabel("title" + String.valueOf(i)).setGroup(String.valueOf(i+1)).setText(s.getString("title")).setPosition(0,5);
-      cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove");
-      cp5.addButton("play"+String.valueOf(i)).setPosition(70,20).setGroup(String.valueOf(i+1)).setLabel("play");
+      cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
+      cp5.addButton("play"+String.valueOf(i)).setPosition(70,20).setGroup(String.valueOf(i+1)).setLabel("play").plugTo(this);
     }
     cp5.addBang("addSong").setPosition(0, height-40).plugTo(this).setLabel("Add song");
     cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
@@ -56,16 +56,16 @@ public class Player {
       JSONObject song = new JSONObject();
       if (meta.title() != "") {
         song.put("title", meta.title());
-        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);;
+        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);
         cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.title()).setPosition(0,5);
-        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove");
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play");
+        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
       } else {
         song.put("title", meta.fileName());
-        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);;
+        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);
         cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.fileName()).setPosition(0,5);
-        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove");
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play");
+        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
       }
       song.put("author", meta.author());
       song.put("album", meta.album());
@@ -92,8 +92,13 @@ public class Player {
     selectFolder("Select a folder to add multiple music files.","checkFolder",null,this);
   }
 
-  void controlEvent(ControlEvent event) {
-    
+  void controlEvent(ControlEvent e) {
+    println(e.getName());
+    if (e.getName().contains("play")){
+      playing.pause();
+      playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
+      playing.play();
+    }
   }
 
 
