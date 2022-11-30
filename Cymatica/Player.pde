@@ -16,7 +16,7 @@ public class Player {
   int messageTimer = 0;
   int number;
   int songNumber = 0;
-  ScrollableList l;
+  Group l;
 
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
     data = p;
@@ -24,7 +24,7 @@ public class Player {
     minim = m;
     number = num;
     cp5 = controller;
-    l = cp5.addScrollableList("list");
+    l = cp5.addGroup("list").setPosition(0,20).setWidth(200);
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     for (int i = 0; i < songList.size(); i++) {
@@ -32,9 +32,13 @@ public class Player {
       AudioPlayer a = minim.loadFile(s.getString("path"));
       audio.add(minim.loadFile(s.getString("path")));
       ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
-      l.addItem(s.getString("title"), i);
+      cp5.addGroup(String.valueOf(i+1)).setGroup("list").setPosition(0,20 + i*60).setWidth(200);
+      cp5.addTextlabel("title" + String.valueOf(i)).setGroup(String.valueOf(i+1)).setText(s.getString("title")).setPosition(0,5);
+      cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove");
+      cp5.addButton("play"+String.valueOf(i)).setPosition(70,20).setGroup(String.valueOf(i+1)).setLabel("play");
     }
-    cp5.addBang("addSong").setPosition(0, height-40).plugTo(this);
+    cp5.addBang("addSong").setPosition(0, height-40).plugTo(this).setLabel("Add song");
+    cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
       playing.play();
@@ -44,7 +48,6 @@ public class Player {
 
   void songAppend(File f) {
     AudioPlayer a;
-    println("Tried to add " + f.getAbsolutePath());
     try {
       a = minim.loadFile(f.getAbsolutePath());
       ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
@@ -53,10 +56,16 @@ public class Player {
       JSONObject song = new JSONObject();
       if (meta.title() != "") {
         song.put("title", meta.title());
-        l.addItem(meta.title(), songList.size());
+        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);;
+        cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.title()).setPosition(0,5);
+        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove");
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play");
       } else {
         song.put("title", meta.fileName());
-        l.addItem(meta.fileName(), songList.size());
+        cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);;
+        cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.fileName()).setPosition(0,5);
+        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove");
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play");
       }
       song.put("author", meta.author());
       song.put("album", meta.album());
@@ -78,11 +87,13 @@ public class Player {
   void addSong() {
     selectInput("Select a WAV, MP3, or AIFF file.", "songAppend", null, this);
   }
+  
+  void addFolder(){
+    selectFolder("Select a folder to add multiple music files.","checkFolder",null,this);
+  }
 
   void controlEvent(ControlEvent event) {
-    if (event.getName()=="list") {
-      songNumber = (int) event.getValue();
-    }
+    
   }
 
 
@@ -97,6 +108,7 @@ public class Player {
           if (songNumber > songList.size()) {
             songNumber = 0;
           }
+          println(songNumber);
           playing = audio.get(songNumber);
           playing.play();
         }
