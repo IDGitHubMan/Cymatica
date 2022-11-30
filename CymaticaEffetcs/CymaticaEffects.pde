@@ -19,7 +19,7 @@ void setup() {
   fullScreen(P3D);
   minim = new Minim(this);
   actual = createGraphics(width,height);
-  s = minim.loadFile("/Users/isaiahdesrosiers/Downloads/1158117_ColBreakz---Crystallize.mp3", 4096);
+  s = minim.loadFile("1-02 Massif.mp3", 4096);
   fftl = new FFT( s.bufferSize(), s.sampleRate() );
   fftr = new FFT( s.bufferSize(), s.sampleRate() );
   fftm = new FFT( s.bufferSize(), s.sampleRate() );
