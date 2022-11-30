@@ -42,7 +42,7 @@ void setup() {
     .getCaptionLabel()
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
   cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100);
-  cp5.addGroup("otherPlayers").setPosition(width-300,height/2).setLabel("Other Players").setSize(200,20).hide();
+  cp5.addGroup("otherPlayers").setPosition(width-200,50).setLabel("Other Players").setSize(200,20).hide();
 }
 
 void draw() {
@@ -107,6 +107,6 @@ void controlEvent(ControlEvent event) {
 }
 
 void moveThings(){
-  cp5.get(Textfield.class,"playlistName").setGroup("otherPlayers").setPosition(0,35);
-  cp5.get(ScrollableList.class,"playlistSelector").setGroup("otherPlayers").setPosition(0,120);
+  cp5.get(Textfield.class,"playlistName").setGroup("otherPlayers").setPosition(0,5);
+  cp5.get(ScrollableList.class,"playlistSelector").setGroup("otherPlayers").setPosition(0,70);
 }
