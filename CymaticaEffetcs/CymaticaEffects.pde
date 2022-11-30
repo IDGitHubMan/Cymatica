@@ -19,7 +19,7 @@ void setup() {
   fullScreen(P3D);
   minim = new Minim(this);
   actual = createGraphics(width,height);
-  s = minim.loadFile("https://vgmsite.com/soundtracks/terraria-calamity-the-tale-of-a-cruel-world/xemdsgoerk/01.%20The%20Tale%20of%20a%20Cruel%20World.mp3", 4096);
+  s = minim.loadFile("/Users/isaiahdesrosiers/Downloads/42. Purin.mp3", 4096);
   fftl = new FFT( s.bufferSize(), s.sampleRate() );
   fftr = new FFT( s.bufferSize(), s.sampleRate() );
   fftm = new FFT( s.bufferSize(), s.sampleRate() );
