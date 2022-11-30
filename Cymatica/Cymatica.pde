@@ -89,7 +89,7 @@ void controlEvent(ControlEvent event) {
     if (p != null && p.playing != null){
       p.playing.pause();
     }
-    String name = cp5.get(Textfield.class, "playlistName").getText();
+    String name = cp5.get(Textfield.class, "playlistName").getText().trim();
     cp5.get(ScrollableList.class,"playlistSelector").addItem(name,json.getJSONArray("playlists").size());
     JSONObject newPlaylist = new JSONObject();
     JSONArray songPaths = new JSONArray();
