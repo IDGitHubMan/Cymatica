@@ -27,7 +27,7 @@ public class Player {
     minim = m;
     number = num;
     cp5 = controller;
-    l = cp5.addGroup("list").setPosition(0,20).setWidth(200);
+    l = cp5.addGroup("list").setPosition(0,20).setWidth(200).showBar();
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     actual = createGraphics(width,height);
@@ -47,11 +47,11 @@ public class Player {
       //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
       cp5.addButton("play"+String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("play").plugTo(this);
     }
-    cp5.addBang("addSong").setPosition(0, height-40).plugTo(this).setLabel("Add song");
+    cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER).setPaddingX(5);
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
-      playing.setGain(-40);
+      playing.setGain(-20);
       playing.play(0);
       fft = ffts.get(0);
       shuffled = (ArrayList<AudioPlayer>)audio.clone();
@@ -90,7 +90,7 @@ public class Player {
       if (playing != null){
         playing.pause();
         playing = a;
-        playing.setGain(-40);
+        playing.setGain(-20);
         playing.play(0);
         fft = ffts.get(0);
       }

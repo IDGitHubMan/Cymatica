@@ -44,7 +44,7 @@ void setup() {
     .getCaptionLabel()
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
   cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100).setHeight(height/2 - 200).setItemHeight(50);
-  cp5.addGroup("otherPlayers").setPosition(width-200,50).setLabel("Other Players").setSize(200,20).hide();
+  cp5.addGroup("otherPlayers").setPosition(width-200,85).setLabel("Other Players").setSize(200,20).hide();
 }
 
 void draw() {
