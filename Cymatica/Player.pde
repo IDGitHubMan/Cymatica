@@ -76,8 +76,8 @@ public class Player {
         song.put("title", meta.fileName().substring(meta.fileName().lastIndexOf("/")+1,meta.fileName().length()-4));
         cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);
         cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.fileName().substring(meta.fileName().lastIndexOf("/")+1,meta.fileName().length()-4)).setPosition(0,5);
-        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
+        //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
       }
       song.put("author", meta.author());
       song.put("album", meta.album());
@@ -135,6 +135,7 @@ public class Player {
 
   void display() {
     if (playing != null){
+      meta = playing.getMetaData();
       actual.beginDraw();
       actual.background(0);
       actual.noFill();
@@ -174,8 +175,11 @@ public class Player {
         if (!loopSingle){
           songNumber += 1;
         }
-        if (number>audio.size()){
+        if (songNumber>=audio.size()){
           songNumber = 0;
+        }
+        if (songNumber<0){
+          songNumber = audio.size() - 1;
         }
         if (shuffle){
           playing = shuffled.get(songNumber);
@@ -193,10 +197,24 @@ public class Player {
         meta = playing.getMetaData();
       }
     }
-    stroke(255);
-    fill(255);
-    textAlign(LEFT, TOP);
-    text(n, width - 200, 0);
+    if (cp5.isVisible()){
+      stroke(255);
+      fill(255);
+      textAlign(LEFT, TOP);
+      text(n, width - 200, 0);
+
+      if (playing != null){
+        textAlign(LEFT,BOTTOM);
+        fill(255);
+        int currentMins = floor(playing.position()/1000/60);
+        int currentSecs = floor((playing.position()/1000)%60);
+        String formattedCurrentSecs = (String.valueOf(currentSecs).length()<2) ? nf(currentSecs,2,0) : String.valueOf(currentSecs);
+        int fullMins = floor(meta.length()/1000/60);
+        int fullSecs = floor((meta.length()/1000)%60);
+        String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
+        text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,200,height);
+      }
+    }
     if (messageTimer > 50) {
       incompatible = false;
     }
