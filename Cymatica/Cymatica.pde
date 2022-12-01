@@ -125,10 +125,10 @@ void moveThings(){
 void keyPressed() {
   if (p.playing.isPlaying() && key == ' ') {
     p.playing.pause();
-    noLoop();
-  } else {
+    p.paused = true;
+  } else if (key == ' ') {
     p.playing.play();
-    loop();
+    p.paused = false;
   }
 
   if (key == 'h'){
