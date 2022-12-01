@@ -51,6 +51,7 @@ public class Player {
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
+      playing.setGain(-40);
       playing.play(0);
       fft = ffts.get(0);
       shuffled = (ArrayList<AudioPlayer>)audio.clone();
@@ -89,6 +90,7 @@ public class Player {
       if (playing != null){
         playing.pause();
         playing = a;
+        playing.setGain(-40);
         playing.play(0);
         fft = ffts.get(0);
       }
@@ -171,6 +173,7 @@ public class Player {
       image(actual,0,0);
     }
     if (songList.size() != 0) {
+      float lastGain = playing.getGain();
       if (playing != null && !playing.isPlaying() && !paused){
         if (!loopSingle){
           songNumber += 1;
@@ -187,7 +190,7 @@ public class Player {
         else{
           playing = audio.get(songNumber);
         }
-        playing = audio.get(songNumber);
+        playing.setGain(lastGain);
         playing.cue(0);
         fft = ffts.get(songNumber);
         playing.play();
