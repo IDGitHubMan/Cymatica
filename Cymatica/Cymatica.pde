@@ -43,7 +43,7 @@ void setup() {
     .setValue("Awesome Sauce")
     .getCaptionLabel()
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
-  cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100);
+  cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width/2-100, height/2+100).setHeight(height/2 - 200).setItemHeight(50);
   cp5.addGroup("otherPlayers").setPosition(width-200,50).setLabel("Other Players").setSize(200,20).hide();
 }
 
@@ -119,7 +119,7 @@ void controlEvent(ControlEvent event) {
 
 void moveThings(){
   cp5.get(Textfield.class,"playlistName").setGroup("otherPlayers").setPosition(0,5);
-  cp5.get(ScrollableList.class,"playlistSelector").setGroup("otherPlayers").setPosition(0,70);
+  cp5.get(ScrollableList.class,"playlistSelector").setGroup("otherPlayers").setPosition(0,70).setHeight(height-140);
 }
 
 void keyPressed() {
@@ -196,10 +196,12 @@ void keyPressed() {
         if (p.songNumber < 0){
           p.songNumber = p.audio.size()-1;
         }
+        float lastGain = p.playing.getGain();
         p.playing.pause();
         p.playing = p.audio.get(p.songNumber);
         p.fft = p.ffts.get(p.songNumber);
         p.meta = p.playing.getMetaData();
+        p.playing.setGain(lastGain);
         p.playing.play(0);
         lastKey = 0;
       }
