@@ -27,7 +27,7 @@ public class Player {
     minim = m;
     number = num;
     cp5 = controller;
-    l = cp5.addGroup("list").setPosition(0,20).setWidth(200).showBar();
+    l = cp5.addGroup("list").setPosition(0,20).setWidth(200).setBackgroundHeight(height-20).setMoveable(true);
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     actual = createGraphics(width,height);
@@ -47,7 +47,7 @@ public class Player {
       //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
       cp5.addButton("play"+String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("play").plugTo(this);
     }
-    cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.RIGHT_OUTSIDE,ControlP5.CENTER).setPaddingX(5);
+    cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
@@ -71,8 +71,8 @@ public class Player {
         song.put("title", meta.title());
         cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);
         cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(String.valueOf(songList.size()+1)).setText(meta.title()).setPosition(0,5);
-        cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(70,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
+        //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("play").plugTo(this);
       } else {
         song.put("title", meta.fileName().substring(meta.fileName().lastIndexOf("/")+1,meta.fileName().length()-4));
         cp5.addGroup(String.valueOf(songList.size()+1)).setGroup("list").setPosition(0,20 + (songList.size())*60).setWidth(200);
@@ -87,12 +87,13 @@ public class Player {
       playlistObj.put("songs", songList);
       data.getJSONArray("playlists").setJSONObject(number, playlistObj);
       saveJSONObject(data, "playlists.json");
+      songNumber = songList.size()-1;
       if (playing != null){
         playing.pause();
         playing = a;
         playing.setGain(-20);
         playing.play(0);
-        fft = ffts.get(0);
+        fft = ffts.get(songNumber);
       }
     }
 
@@ -204,10 +205,15 @@ public class Player {
       stroke(255);
       fill(255);
       textAlign(LEFT, TOP);
+      textSize(30);
       text(n, width - 200, 0);
-
+      textSize(10);
+      textAlign(LEFT,BOTTOM);
+      JSONObject song = (JSONObject) songList.get(songNumber);
+      text(song.getString("title"),width-200,50);
       if (playing != null){
         textAlign(LEFT,BOTTOM);
+        textSize(20);
         fill(255);
         int currentMins = floor(playing.position()/1000/60);
         int currentSecs = floor((playing.position()/1000)%60);
