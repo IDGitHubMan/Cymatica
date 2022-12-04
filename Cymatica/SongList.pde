@@ -2,15 +2,15 @@ class SongList{
     Player p;
     SongList(Player parent){
         p = parent;
-        for (int i = 0; i < songList.size(); i++) {
+        for (int i = 0; i < p.songList.size(); i++) {
         JSONObject s = (JSONObject) p.songList.get(i);
         AudioPlayer a = minim.loadFile(s.getString("path"));
         try {
-            audio.add(minim.loadFile(s.getString("path")));
-            ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
+            p.audio.add(minim.loadFile(s.getString("path")));
+            p.ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
         }
         catch (NullPointerException e){
-            incompatible = true;
+            p.incompatible = true;
             continue;
         }
         cp5.addGroup(String.valueOf(i+1)).setGroup("list").setPosition(0,20 + i*60).setWidth(200);
