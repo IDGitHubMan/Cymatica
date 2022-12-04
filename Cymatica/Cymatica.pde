@@ -178,6 +178,7 @@ void keyPressed() {
         p.meta = p.playing.getMetaData();
         p.playing.play(0);
         lastKey = 0;
+        p.seekbar.setRange(0,p.meta.length());
       }
       else{
         p.playing.cue(p.playing.position()+5000);
@@ -204,6 +205,7 @@ void keyPressed() {
         p.playing.setGain(lastGain);
         p.playing.play(0);
         lastKey = 0;
+        p.seekbar.setRange(0,p.meta.length());
       }
       else{
         p.playing.cue(p.playing.position() - 5000);
