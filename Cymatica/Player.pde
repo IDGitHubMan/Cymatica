@@ -118,7 +118,7 @@ public class Player {
       if (playing != null){
         playing.pause();
       }
-      playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
+      playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1))-1);
       playing.play(0);
       fft = ffts.get(0);
     }
@@ -184,8 +184,11 @@ public class Player {
       actual.endDraw();
       image(actual,0,0);
     }
+    float lastGain = -20;
     if (songList.size() != 0) {
-      float lastGain = playing.getGain();
+      if (playing != null){
+        lastGain = playing.getGain();
+      }
       if (playing != null && !playing.isPlaying() && !paused){
         if (!loopSingle){
           songNumber += 1;
@@ -221,8 +224,10 @@ public class Player {
       text(n, width - 200, 0);
       textSize(10);
       textAlign(LEFT,BOTTOM);
-      JSONObject song = (JSONObject) songList.get(songNumber);
-      text(song.getString("title"),width-200,50);
+      if (songList.size() != 0){
+        JSONObject song = (JSONObject) songList.get(songNumber);
+        text(song.getString("title"),width-200,50);
+      }
       if (playing != null){
         textAlign(LEFT,BOTTOM);
         textSize(20);
