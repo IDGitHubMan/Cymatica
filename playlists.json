@@ -1,0 +1,206 @@
+{
+  "playlists": [
+    {
+      "settings": [],
+      "songs": [],
+      "name": "Awesome Sauce"
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/30. Close To Me - Sabrepulse.mp3",
+          "author": "Sabrepulse",
+          "album": "Just Shapes & Beats",
+          "title": "Close To Me"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/28. Spectra - Chipzel.mp3",
+          "author": "Chipzel",
+          "album": "Just Shapes & Beats",
+          "title": "Spectra"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/73. Spider Dance - Shirobon.mp3",
+          "author": "Shirobon",
+          "album": "Just Shapes & Beats",
+          "title": "Spider Dance"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/60. La Danse Macabre - Shirobon.mp3",
+          "author": "Shirobon",
+          "album": "Just Shapes & Beats",
+          "title": "La Danse Macabre"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/19. Cheat Codes - Nitro Fun.mp3",
+          "author": "Nitro Fun",
+          "album": "Just Shapes & Beats",
+          "title": "Cheat Codes"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/72. Born Survivor - Shirobon.mp3",
+          "author": "Shirobon",
+          "album": "Just Shapes & Beats",
+          "title": "Born Survivor"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/53. Fox - Shirobon.mp3",
+          "author": "Shirobon",
+          "album": "Just Shapes & Beats",
+          "title": "Fox"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/29. Unlocked - Plesco.mp3",
+          "author": "Plesco",
+          "album": "Just Shapes & Beats",
+          "title": "Unlocked"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/61. In The Halls Of The Usurper - Kubbi.mp3",
+          "author": "Kubbi",
+          "album": "Just Shapes & Beats",
+          "title": "In The Halls Of The Usurper"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/44. Wicked - Avenza.mp3",
+          "author": "Avenza",
+          "album": "Just Shapes & Beats",
+          "title": "Wicked"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/toby fox - UNDERTALE Soundtrack - 100 MEGALOVANIA.mp3",
+          "author": "toby fox",
+          "album": "UNDERTALE Soundtrack",
+          "title": "MEGALOVANIA"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/39. Freeplay Menu.mp3",
+          "author": "Saster",
+          "album": "Friday Night Funkin' Lullaby OST",
+          "title": "Freeplay Menu"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/Adhesive Wombat Track1.mp3",
+          "author": "",
+          "album": "",
+          "title": "Adhesive Wombat Track1"
+        }
+      ],
+      "name": "Chill + Chippy"
+    },
+    {
+      "settings": [],
+      "songs": [],
+      "name": "Glitchy"
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/60. La Danse Macabre - Shirobon.mp3",
+          "author": "Shirobon",
+          "album": "Just Shapes & Beats",
+          "title": "La Danse Macabre"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/Waters of Megalovania.mp3",
+          "author": "BotanicSage",
+          "album": "",
+          "title": "Waters of Megalovania"
+        }
+      ],
+      "name": "bethias playlit "
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/1158117_ColBreakz---Crystallize.mp3",
+          "author": "",
+          "album": "",
+          "title": "Crystallize"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/CymaticaEffetcs/data/1-02 Massif.mp3",
+          "author": "Cheetah Mobile",
+          "album": "Rolling Sky (Original Game Soundtrack)",
+          "title": "Massif"
+        }
+      ],
+      "name": "Coolio"
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/19. Frostbite.mp3",
+          "author": "Punkett",
+          "album": "Friday Night Funkin' Lullaby OST",
+          "title": "Frostbite"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Documents/Projects/Cymatica/SoundViz/data/1-17. Triple Trouble (With SFX) (3).mp3",
+          "author": "MarStarBro, Uptaunt, Punkett",
+          "album": "Friday Night Funkin' - VS. Sonic.exe OST",
+          "title": "Triple Trouble (With SFX)"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/43. Purin (Unreversed Mix).mp3",
+          "author": "Jacaris",
+          "album": "Friday Night Funkin' Lullaby OST",
+          "title": "Purin (Unreversed Mix)"
+        }
+      ],
+      "name": "SPOOPY!"
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/19. Frostbite.mp3",
+          "author": "Punkett",
+          "album": "Friday Night Funkin' Lullaby OST",
+          "title": "Frostbite"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/42. Purin.mp3",
+          "author": "Jacaris",
+          "album": "Friday Night Funkin' Lullaby OST",
+          "title": "Purin"
+        }
+      ],
+      "name": "Esther"
+    },
+    {
+      "settings": [],
+      "songs": [
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/01. The Tale of a Cruel World.mp3",
+          "author": "DM DOKURO",
+          "album": "The Tale of a Cruel World (Calamity Original Soundtrack)",
+          "title": "The Tale of a Cruel World"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/1-01. Dearly Beloved.mp3",
+          "author": "Yoko Shimomura, Kaoru Wada",
+          "album": "Kingdom Hearts II Original Soundtrack [From KINGDOM HEARTS Original Soundtrack COMPLETE Disc 3 ~ 6]",
+          "title": "Dearly Beloved"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/10. Ezio's Family.mp3",
+          "author": "Jesper Kyd",
+          "album": "Assassin\u2019s Creed: The Best of Jesper Kyd",
+          "title": "Ezio's Family"
+        },
+        {
+          "path": "/Users/isaiahdesrosiers/Downloads/26. Hollow Knight.mp3",
+          "author": "Christopher Larkin",
+          "album": "Hollow Knight (Original Soundtrack)",
+          "title": "Hollow Knight"
+        }
+      ],
+      "name": "OST"
+    }
+  ]
+}
