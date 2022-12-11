@@ -20,7 +20,7 @@ AudioPlayer playing;
 ArrayList<AudioPlayer> shuffled = new ArrayList();
 int number = 0;
 void settings(){
-  fullScreen();
+  fullScreen(P3D);
   //size(1920,1080);
 }
 
