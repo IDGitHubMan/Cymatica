@@ -36,7 +36,7 @@ public class Player {
     l = cp5.addGroup("list").setPosition(0,20).setWidth(200).setBackgroundColor(0).setMoveable(true);
     seekbar = cp5.addSlider("seek").setPosition(200,height - 50).setWidth(width-400).setCaptionLabel("").plugTo(this);
     seekbar.getValueLabel().hide();
-    cp5.addBang("loopSwitch").setPosition(width-250,height-110).setSize(50,10).setCaptionLabel("").plugTo(this);
+    cp5.addToggle("loopSingle").setPosition(width-250,height-110).setSize(50,10).setCaptionLabel("").plugTo(this).setValue(loopSingle);
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     actual = createGraphics(width,height);
@@ -127,6 +127,7 @@ public class Player {
       playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       songNumber = Integer.parseInt(e.getName().substring(e.getName().length()-1));
       playing.play(0);
+      seekbar.setRange(0,playing.length());
       fft = ffts.get(0);
     }
     else if (e.getName().contains("remove")){
@@ -168,20 +169,20 @@ public class Player {
       fft.forward(playing.left);
       actual.stroke(0,255,255);
       for(int i = 0; i < fft.specSize(); i++){
-        float xPos = ceil(map(i,0,fft.specSize(),-2,width-2));
-        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+        float xPos = ceil(map(i,0,fft.specSize(),198,width-202));
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
       }
       fft.forward(playing.right);
       actual.stroke(255,0,0);
       for(int i = 0; i < fft.specSize(); i++){
-        float xPos = ceil(map(i,0,fft.specSize(),2,width+2));
-        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+        float xPos = ceil(map(i,0,fft.specSize(),202,width-198));
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
       }
       fft.forward(playing.mix);
       actual.stroke(255,255,255);
       for(int i = 0; i < fft.specSize(); i++){
-        float xPos = ceil(map(i,0,fft.specSize(),0,width));
-        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+        float xPos = ceil(map(i,0,fft.specSize(),200,width-200));
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
       }
       actual.fill(0,50);
       actual.noStroke();
