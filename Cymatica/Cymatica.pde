@@ -149,7 +149,7 @@ void keyPressed() {
       }
     }
 
-    if (key == 'r') {
+    if (key == 'r' || key == 'l') {
       p.loopSingle = !p.loopSingle;
     }
 
