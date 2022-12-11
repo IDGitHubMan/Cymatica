@@ -51,7 +51,7 @@ void draw() {
   if (lastKey == LEFT || lastKey == RIGHT) {
     doubleCount ++;
   }
-  if (doubleCount > frameRate / 2) {
+  if (doubleCount > frameRate / 3) {
     lastKey = 0;
     doubleCount = 0;
   }
