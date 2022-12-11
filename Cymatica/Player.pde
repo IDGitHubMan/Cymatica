@@ -118,7 +118,7 @@ public class Player {
       if (playing != null){
         playing.pause();
       }
-      playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1))-1);
+      playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       playing.play(0);
       fft = ffts.get(0);
     }
@@ -213,7 +213,7 @@ public class Player {
           songNumber = 0;
         }
         meta = playing.getMetaData();
-        seekbar.setRange(0,meta.length());
+        seekbar.setRange(0,playing.length());
       }
     }
     if (cp5.isVisible()){
@@ -235,8 +235,8 @@ public class Player {
         int currentMins = floor(playing.position()/1000/60);
         int currentSecs = floor((playing.position()/1000)%60);
         String formattedCurrentSecs = (String.valueOf(currentSecs).length()<2) ? nf(currentSecs,2,0) : String.valueOf(currentSecs);
-        int fullMins = floor(meta.length()/1000/60);
-        int fullSecs = floor((meta.length()/1000)%60);
+        int fullMins = floor(playing.length()/1000/60);
+        int fullSecs = floor((playing.length()/1000)%60);
         String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
         text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,200,height);
       }
