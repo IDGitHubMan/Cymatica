@@ -1,7 +1,9 @@
 public class Player {
+  PImage loopSymbol;
   ControlP5 cp5;
   Minim minim;
   String n;
+  float loopCircle = 0.0;
   ArrayList<AudioPlayer> audio = new ArrayList();
   ArrayList<AudioPlayer> shuffled;
   AudioPlayer playing;
@@ -25,6 +27,7 @@ public class Player {
   int seek;
 
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
+    loopSymbol = loadImage("loop.png");
     data = p;
     n = name;
     minim = m;
@@ -33,15 +36,17 @@ public class Player {
     l = cp5.addGroup("list").setPosition(0,20).setWidth(200).setBackgroundColor(0).setMoveable(true);
     seekbar = cp5.addSlider("seek").setPosition(200,height - 50).setWidth(width-400).setCaptionLabel("").plugTo(this);
     seekbar.getValueLabel().hide();
+    cp5.addBang("loopSwitch").setPosition(width-250,height-110).setSize(50,10).setCaptionLabel("").plugTo(this);
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     actual = createGraphics(width,height);
     for (int i = 0; i < songList.size(); i++) {
       JSONObject s = (JSONObject) songList.get(i);
       AudioPlayer a = minim.loadFile(s.getString("path"));
+      FFT fast = new FFT(a.bufferSize(), a.sampleRate());
       try {
         audio.add(minim.loadFile(s.getString("path")));
-        ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
+        ffts.add(fast);
       }
       catch (NullPointerException e){
         incompatible = true;
@@ -52,6 +57,7 @@ public class Player {
       cp5.addButton("play"+String.valueOf(i)).setPosition(0,20 + i * 37).setLabel("play").plugTo(this).setGroup(l);
     }
     cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
+
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
@@ -119,6 +125,7 @@ public class Player {
         playing.pause();
       }
       playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
+      songNumber = Integer.parseInt(e.getName().substring(e.getName().length()-1));
       playing.play(0);
       fft = ffts.get(0);
     }
@@ -133,7 +140,7 @@ public class Player {
       saveJSONObject(data,"playlists.json");
       cp5.remove(String.valueOf(Integer.parseInt(e.getName().substring(e.getName().length()-1))+1));
     }
-    else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.position()){
+    else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.position() && seekbar.isMouseOver()){
       playing.pause();
       playing.cue(seek);
       playing.play();
@@ -144,14 +151,41 @@ public class Player {
   void checkFolder() {
   }
 
+  void loopSwitch() {
+    loopSingle = !loopSingle;
+  }
+
   
 
   void display() {
+    if (loopSingle){
+      loopCircle += 0.01;
+    }
     if (playing != null){
       meta = playing.getMetaData();
       seekbar.setValue(playing.position());
       actual.beginDraw();
-      actual.background(0);
+      fft.forward(playing.left);
+      actual.stroke(0,255,255);
+      for(int i = 0; i < fft.specSize(); i++){
+        float xPos = ceil(map(i,0,fft.specSize(),-2,width-2));
+        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+      }
+      fft.forward(playing.right);
+      actual.stroke(255,0,0);
+      for(int i = 0; i < fft.specSize(); i++){
+        float xPos = ceil(map(i,0,fft.specSize(),2,width+2));
+        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+      }
+      fft.forward(playing.mix);
+      actual.stroke(255,255,255);
+      for(int i = 0; i < fft.specSize(); i++){
+        float xPos = ceil(map(i,0,fft.specSize(),0,width));
+        actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/2);
+      }
+      actual.fill(0,50);
+      actual.noStroke();
+      actual.rect(0,0,actual.width,actual.height);
       actual.noFill();
       actual.stroke(0, 255,  255);
       actual.ellipse(width/2, height/2, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
@@ -183,6 +217,11 @@ public class Player {
       }
       actual.endDraw();
       image(actual,0,0);
+      pushMatrix();
+      translate(width-225,height-75);
+      rotate(loopCircle);
+      image(loopSymbol,-25,-25,50,50);
+      popMatrix();
     }
     float lastGain = -20;
     if (songList.size() != 0) {
@@ -190,6 +229,7 @@ public class Player {
         lastGain = playing.getGain();
       }
       if (playing != null && !playing.isPlaying() && !paused){
+        actual.background(0);
         if (!loopSingle){
           songNumber += 1;
         }
