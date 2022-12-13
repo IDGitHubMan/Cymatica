@@ -18,6 +18,7 @@ boolean initial = true;
 boolean playlistSelected = false;
 int doubleCount = 0;
 int lastKey;
+String path;
 
 void settings() {
   fullScreen(P3D);
@@ -28,15 +29,16 @@ void setup() {
   symFont = loadFont("Webdings-48.vlw");
   minim = new Minim(this);
   cp5 = new ControlP5(this);
-  File f = new File(sketchPath() + "/playlists.json");
+  path = sketchPath() + "/data/playlists.json";
+  File f = new File(path);
   if (!f.isFile()) {
-    createWriter("playlists.json");
+    //createOutput(path);
     JSONObject playlists = new JSONObject();
     JSONArray array = new JSONArray();
     playlists.put("playlists", array);
-    saveJSONObject(playlists, "playlists.json");
+    saveJSONObject(playlists, path);
   }
-  json = loadJSONObject("playlists.json");
+  json = loadJSONObject(path);
   cp5.addTextfield("playlistName")
     .setSize(200, 50)
     .setPosition(width / 2 - 100, height / 2)
@@ -107,7 +109,7 @@ void controlEvent(ControlEvent event) {
     newPlaylist.put("songs", songPaths);
     newPlaylist.put("settings", visSettings);
     json.getJSONArray("playlists").append(newPlaylist);
-    saveJSONObject(json, "playlists.json");
+    saveJSONObject(json, path);
     if (p != null && p.playing != null) {
       p.playing.pause();
     }
@@ -151,6 +153,7 @@ void keyPressed() {
 
     if (key == 'r' || key == 'l') {
       p.loopSingle = !p.loopSingle;
+      cp5.get(Toggle.class,"loopSingle").setValue(p.loopSingle);
     }
 
     if (key == 's') {
@@ -158,11 +161,13 @@ void keyPressed() {
     }
 
     if (keyCode == UP) {
-      p.playing.setGain(p.playing.getGain() + 1);
+      p.gain = p.playing.getGain() + 1;
+      p.playing.setGain(p.gain);
     }
 
     if (keyCode == DOWN) {
-      p.playing.setGain(p.playing.getGain() - 1);
+      p.gain = p.playing.getGain() - 1;
+      p.playing.setGain(p.gain);
     }
 
     if (keyCode == RIGHT) {
@@ -191,16 +196,17 @@ void keyPressed() {
     if (keyCode == LEFT) {
       if (lastKey != 0) {
         if (lastKey == LEFT && doubleCount <= frameRate / 2) {
-          p.songNumber --;
+          if (p.playing.position() <= 3000){
+            p.songNumber --;
+          }  
           if (p.songNumber < 0) {
             p.songNumber = p.audio.size() - 1;
           }
-          float lastGain = p.playing.getGain();
           p.playing.pause();
           p.playing = p.audio.get(p.songNumber);
           p.fft = p.ffts.get(p.songNumber);
           p.meta =p.playing.getMetaData();
-          p.playing.setGain(lastGain);
+          p.playing.setGain(p.gain);
           p.playing.play(0);
           lastKey = 0;
           p.seekbar.setRange(0, p.meta.length());

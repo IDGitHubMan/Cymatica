@@ -1,4 +1,5 @@
 public class Player {
+  float gain = 0.0f;
   PImage loopSymbol;
   ControlP5 cp5;
   Minim minim;
@@ -25,7 +26,7 @@ public class Player {
   boolean seeking = false;
   PGraphics actual;
   int seek;
-
+  String jPath = sketchPath() + "/data/playlists.json";
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
     loopSymbol = loadImage("loop.png");
     data = p;
@@ -39,7 +40,7 @@ public class Player {
     cp5.addToggle("loopSingle").setPosition(width-250,height-110).setSize(50,10).setCaptionLabel("").plugTo(this).setValue(loopSingle);
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
-    actual = createGraphics(width,height);
+    actual = createGraphics(width,height,P3D);
     for (int i = 0; i < songList.size(); i++) {
       JSONObject s = (JSONObject) songList.get(i);
       AudioPlayer a = minim.loadFile(s.getString("path"));
@@ -49,8 +50,14 @@ public class Player {
         ffts.add(fast);
       }
       catch (NullPointerException e){
-        incompatible = true;
-        continue;
+        try {
+          audio.add(minim.loadFile(s.getString("path2")));
+          ffts.add(fast);
+        }
+        catch (NullPointerException e2) {
+          incompatible = true;
+          continue;
+        }
       }
       cp5.addTextlabel("title" + String.valueOf(i)).setText(s.getString("title")).setPosition(0,5+37*i).setGroup(l);
       //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
@@ -61,7 +68,7 @@ public class Player {
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
     if (audio.size()!=0) {
       playing = audio.get(0);
-      //playing.setGain(-20);
+      playing.setGain(gain);
       playing.play(0);
       fft = ffts.get(0);
       seekbar.setRange(0,playing.length());
@@ -76,6 +83,9 @@ public class Player {
       a = minim.loadFile(f.getAbsolutePath());
       ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
       audio.add(a);
+      String path = sketchPath() + "/data/" + n + "/" + f.getName();
+      createOutput(path);
+      saveBytes(path,loadBytes(f.getAbsolutePath()));
       AudioMetaData meta = a.getMetaData();
       JSONObject song = new JSONObject();
       if (meta.title() != "") {
@@ -91,17 +101,26 @@ public class Player {
       }
       song.put("author", meta.author());
       song.put("album", meta.album());
-      song.put("path", f.getAbsolutePath());
+      song.put("path", path);
+      song.put("path2",f.getAbsolutePath());
       songList.append(song);
       playlistObj.put("songs", songList);
       data.getJSONArray("playlists").setJSONObject(number, playlistObj);
-      saveJSONObject(data, "playlists.json");
+      saveJSONObject(data, jPath);
       songNumber = songList.size()-1;
       if (playing != null){
         playing.pause();
         playing = a;
-        playing.setGain(-20);
+        playing.setGain(gain);
         playing.play(0);
+        seekbar.setRange(0,playing.length());
+        fft = ffts.get(songNumber);
+      }
+      else{
+        playing = a;
+        playing.setGain(gain);
+        playing.play(0);
+        seekbar.setRange(0,playing.length());
         fft = ffts.get(songNumber);
       }
     }
@@ -127,6 +146,7 @@ public class Player {
       playing = audio.get(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       songNumber = Integer.parseInt(e.getName().substring(e.getName().length()-1));
       playing.play(0);
+      playing.setGain(gain);
       seekbar.setRange(0,playing.length());
       fft = ffts.get(0);
     }
@@ -138,7 +158,7 @@ public class Player {
       songList.remove(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       playlistObj.put("songs",songList);
       data.getJSONArray("playlists").setJSONObject(number,playlistObj);
-      saveJSONObject(data,"playlists.json");
+      saveJSONObject(data,jPath);
       cp5.remove(String.valueOf(Integer.parseInt(e.getName().substring(e.getName().length()-1))+1));
     }
     else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.position() && seekbar.isMouseOver()){
@@ -170,19 +190,19 @@ public class Player {
       actual.stroke(0,255,255);
       for(int i = 0; i < fft.specSize(); i++){
         float xPos = ceil(map(i,0,fft.specSize(),198,width-202));
-        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 50);
       }
       fft.forward(playing.right);
       actual.stroke(255,0,0);
       for(int i = 0; i < fft.specSize(); i++){
         float xPos = ceil(map(i,0,fft.specSize(),202,width-198));
-        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 50);
       }
       fft.forward(playing.mix);
       actual.stroke(255,255,255);
       for(int i = 0; i < fft.specSize(); i++){
         float xPos = ceil(map(i,0,fft.specSize(),200,width-200));
-        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+2)/4 - 50);
+        actual.line(xPos,height-50,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 50);
       }
       actual.fill(0,50);
       actual.noStroke();
@@ -217,18 +237,8 @@ public class Player {
         actual.line( x1, height/2 + map(playing.mix.get(i),-1,1,-100,100), x2, height/2 + map(playing.mix.get(i+1),-1,1,-100,100) );
       }
       actual.endDraw();
-      image(actual,0,0);
-      pushMatrix();
-      translate(width-225,height-75);
-      rotate(loopCircle);
-      image(loopSymbol,-25,-25,50,50);
-      popMatrix();
     }
-    float lastGain = -20;
     if (songList.size() != 0) {
-      if (playing != null){
-        lastGain = playing.getGain();
-      }
       if (playing != null && !playing.isPlaying() && !paused){
         actual.background(0);
         if (!loopSingle){
@@ -246,7 +256,7 @@ public class Player {
         else{
           playing = audio.get(songNumber);
         }
-        playing.setGain(lastGain);
+        playing.setGain(gain);
         playing.cue(0);
         fft = ffts.get(songNumber);
         playing.play();
@@ -258,6 +268,15 @@ public class Player {
       }
     }
     if (cp5.isVisible()){
+      image(actual,0,0);
+      pushMatrix();
+      translate(width-225,height-75);
+      rotate(loopCircle);
+      image(loopSymbol,-25,-25,50,50);
+      popMatrix();
+      textAlign(CENTER,CENTER);
+      textSize(25);
+      text("1",width-225,height-79);
       stroke(255);
       fill(255);
       textAlign(LEFT, TOP);
