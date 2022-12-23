@@ -29,10 +29,11 @@ void setup() {
   symFont = loadFont("Webdings-48.vlw");
   minim = new Minim(this);
   cp5 = new ControlP5(this);
+  cp5.setAutoDraw(false);
   path = sketchPath() + "/data/playlists.json";
   File f = new File(path);
   if (!f.isFile()) {
-    //createOutput(path);
+    createOutput(path);
     JSONObject playlists = new JSONObject();
     JSONArray array = new JSONArray();
     playlists.put("playlists", array);
@@ -79,6 +80,7 @@ void draw() {
         }
       }
     }
+    cp5.draw();
   } else {
     p.display();
   }
@@ -127,12 +129,17 @@ void moveThings() {
 
 void keyPressed() {
   if (p != null) {
-    if ( p.playing != null && p.playing.isPlaying() && key == ' ') {
-      p.playing.pause();
-      p.paused = true;
-    } else if (key == ' ') {
-      p.playing.play();
-      p.paused = false;
+    if (key == '1' && p.fft != null){
+        p.fft.noAverages();
+    }
+    if (key == '2' && p.fft != null){
+        p.fft.linAverages(30);
+    }
+    if (key == '3' && p.fft != null){
+        p.fft.logAverages(22,3);
+    }
+    if ( key == ' ') {
+      p.playPause();
     }
 
     if (key == 'h') {
@@ -149,6 +156,7 @@ void keyPressed() {
       } else {
         p.playing.mute();
       }
+      cp5.get(Toggle.class,"mute").setValue(!p.playing.isMuted());
     }
 
     if (key == 'r' || key == 'l') {
@@ -158,6 +166,7 @@ void keyPressed() {
 
     if (key == 's') {
       p.shuffle = !p.shuffle;
+      cp5.get(Toggle.class,"shuffle").setValue(p.shuffle);
     }
 
     if (keyCode == UP) {
@@ -178,10 +187,16 @@ void keyPressed() {
             p.songNumber = 0;
           }
           p.playing.pause();
-          p.playing = p.audio.get(p.songNumber);
+          if (!p.shuffle){
+            p.playing = p.audio.get(p.songNumber);
+          }
+          else{
+            p.playing = p.shuffled.get(p.songNumber);
+          }
           p.fft = p.ffts.get(p.songNumber);
           p.meta =p.playing.getMetaData();
           p.playing.play(0);
+          p.playing.unmute();
           lastKey = 0;
           p.seekbar.setRange(0, p.meta.length());
         } else {
@@ -203,11 +218,17 @@ void keyPressed() {
             p.songNumber = p.audio.size() - 1;
           }
           p.playing.pause();
-          p.playing = p.audio.get(p.songNumber);
+          if (!p.shuffle){
+            p.playing = p.audio.get(p.songNumber);
+          }
+          else{
+            p.playing = p.shuffled.get(p.songNumber);
+          }
           p.fft = p.ffts.get(p.songNumber);
           p.meta =p.playing.getMetaData();
           p.playing.setGain(p.gain);
           p.playing.play(0);
+          p.playing.unmute();
           lastKey = 0;
           p.seekbar.setRange(0, p.meta.length());
         } else {
