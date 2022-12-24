@@ -129,20 +129,11 @@ void moveThings() {
 
 void keyPressed() {
   if (p != null) {
-    if (key == '1' && p.fft != null){
-        p.fft.noAverages();
-    }
-    if (key == '2' && p.fft != null){
-        p.fft.linAverages(30);
-    }
-    if (key == '3' && p.fft != null){
-        p.fft.logAverages(22,3);
-    }
-    if ( key == ' ') {
+    if ( key == ' ' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       p.playPause();
     }
 
-    if (key == 'h') {
+    if (key == 'h' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (cp5.isVisible()) {
         cp5.hide();
       } else {
@@ -150,7 +141,7 @@ void keyPressed() {
       }
     }
 
-    if (key == 'm') {
+    if (key == 'm' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (p.playing.isMuted()) {
         p.playing.unmute();
       } else {
@@ -159,12 +150,12 @@ void keyPressed() {
       cp5.get(Toggle.class,"mute").setValue(!p.playing.isMuted());
     }
 
-    if (key == 'r' || key == 'l') {
+    if (key == 'r' && !cp5.get(Textfield.class,"playlistName").isFocus() || key == 'l' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       p.loopSingle = !p.loopSingle;
       cp5.get(Toggle.class,"loopSingle").setValue(p.loopSingle);
     }
 
-    if (key == 's') {
+    if (key == 's' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       p.shuffle = !p.shuffle;
       cp5.get(Toggle.class,"shuffle").setValue(p.shuffle);
     }
@@ -179,7 +170,7 @@ void keyPressed() {
       p.playing.setGain(p.gain);
     }
 
-    if (keyCode == RIGHT) {
+    if (keyCode == RIGHT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == RIGHT && doubleCount <= frameRate / 2) {
           p.songNumber ++;
@@ -208,7 +199,7 @@ void keyPressed() {
       }
     }
 
-    if (keyCode == LEFT) {
+    if (keyCode == LEFT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == LEFT && doubleCount <= frameRate / 2) {
           if (p.playing.position() <= 3000){
