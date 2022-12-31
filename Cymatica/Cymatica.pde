@@ -92,7 +92,7 @@ void controlEvent(ControlEvent event) {
     String title = ob.getString("name");
     print(title);
     if (p != null && p.playing != null) {
-      p.playing.pause();
+      p.playing.audio.pause();
     }
     p = new Player(cp5, minim, title, json, (int) cp5.get(ScrollableList.class, "playlistSelector").getValue());
     playlistSelected = true;
@@ -100,7 +100,7 @@ void controlEvent(ControlEvent event) {
     cp5.get(Group.class, "otherPlayers").show();
   } else if (event.getName() == "makePlaylist" || event.getName() == "playlistName") {
     if (p != null && p.playing != null) {
-      p.playing.pause();
+      p.playing.audio.pause();
     }
     String name = cp5.get(Textfield.class, "playlistName").getText().trim();
     cp5.get(ScrollableList.class, "playlistSelector").addItem(name, json.getJSONArray("playlists").size());
@@ -113,7 +113,7 @@ void controlEvent(ControlEvent event) {
     json.getJSONArray("playlists").append(newPlaylist);
     saveJSONObject(json, path);
     if (p != null && p.playing != null) {
-      p.playing.pause();
+      p.playing.audio.pause();
     }
     p = new Player(cp5, minim, name, json, json.getJSONArray("playlists").size()-1);
     playlistSelected = true;
@@ -142,12 +142,12 @@ void keyPressed() {
     }
 
     if (key == 'm' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
-      if (p.playing.isMuted()) {
-        p.playing.unmute();
+      if (p.playing.audio.isMuted()) {
+        p.playing.audio.unmute();
       } else {
-        p.playing.mute();
+        p.playing.audio.mute();
       }
-      cp5.get(Toggle.class,"mute").setValue(!p.playing.isMuted());
+      cp5.get(Toggle.class,"mute").setValue(!p.playing.audio.isMuted());
     }
 
     if (key == 'r' && !cp5.get(Textfield.class,"playlistName").isFocus() || key == 'l' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
@@ -161,73 +161,67 @@ void keyPressed() {
     }
 
     if (keyCode == UP) {
-      p.gain = p.playing.getGain() + 1;
-      p.playing.setGain(p.gain);
+      p.gain = p.playing.audio.getGain() + 1;
+      p.playing.audio.setGain(p.gain);
     }
 
     if (keyCode == DOWN) {
-      p.gain = p.playing.getGain() - 1;
-      p.playing.setGain(p.gain);
+      p.gain = p.playing.audio.getGain() - 1;
+      p.playing.audio.setGain(p.gain);
     }
 
     if (keyCode == RIGHT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == RIGHT && doubleCount <= frameRate / 2) {
           p.songNumber ++;
-          if (p.songNumber >= p.audio.size()) {
+          if (p.songNumber >= p.songs.size()) {
             p.songNumber = 0;
           }
-          p.playing.pause();
+          p.playing.audio.pause();
           if (!p.shuffle){
-            p.playing = p.audio.get(p.songNumber);
+            p.playing = p.songs.get(p.songNumber);
           }
           else{
-            p.playing = p.shuffled.get(p.songNumber);
+            p.playing = p.shuffles.get(p.songNumber);
           }
-          p.fft = p.ffts.get(p.songNumber);
-          p.meta =p.playing.getMetaData();
-          p.playing.play(0);
-          p.playing.unmute();
+          p.playing.audio.play(0);
+          p.playing.audio.unmute();
           lastKey = 0;
-          p.seekbar.setRange(0, p.meta.length());
         } else {
-          p.playing.cue(p.playing.position() + 5000);
+          p.playing.audio.cue(p.playing.audio.position() + 5000);
         }
       } else {
         lastKey = RIGHT;
-        p.playing.cue(p.playing.position() + 5000);
+        p.playing.audio.cue(p.playing.audio.position() + 5000);
       }
     }
 
     if (keyCode == LEFT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == LEFT && doubleCount <= frameRate / 2) {
-          if (p.playing.position() <= 3000){
+          if (p.playing.audio.position() <= 3000){
             p.songNumber --;
           }  
           if (p.songNumber < 0) {
-            p.songNumber = p.audio.size() - 1;
+            p.songNumber = p.songs.size() - 1;
           }
-          p.playing.pause();
+          p.playing.audio.pause();
           if (!p.shuffle){
-            p.playing = p.audio.get(p.songNumber);
+            p.playing = p.songs.get(p.songNumber);
           }
           else{
-            p.playing = p.shuffled.get(p.songNumber);
+            p.playing = p.shuffles.get(p.songNumber);
           }
-          p.fft = p.ffts.get(p.songNumber);
-          p.meta =p.playing.getMetaData();
-          p.playing.setGain(p.gain);
-          p.playing.play(0);
-          p.playing.unmute();
+          p.playing.audio.setGain(p.gain);
+          p.playing.audio.play(0);
+          p.playing.audio.unmute();
           lastKey = 0;
-          p.seekbar.setRange(0, p.meta.length());
         } else {
-          p.playing.cue(p.playing.position() - 5000);
+          p.playing.audio.cue(p.playing.audio.position() - 5000);
         }
       } else {
         lastKey = LEFT;
-        p.playing.cue(p.playing.position() - 5000);
+        p.playing.audio.cue(p.playing.audio.position() - 5000);
       }
     }
   }

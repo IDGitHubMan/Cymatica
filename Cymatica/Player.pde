@@ -1,36 +1,52 @@
 public class Player {
-  int fftType = 0;
-  float gain = 0.0f;
-  int shufflePos = 0;
-  int shuffleInc = 1;
+  //Super important path builder
+  String jPath = sketchPath() + "/data/playlists.json";
+
+  //Visualizer settings
+  boolean showLeft = true; //Include left vis
+  boolean showRight = true; //Include right vis
+  int fftType = 0; // Bar or plot FFT
+  int linAvgNum = 30; //Number of bands for linear averaging
+  int logAvgWidth = 22; //Logarithmic average octave width (in hertz)
+  int logAvgBands = 3; //Number of bands to split each octave into
+
+  //Internal player values
+  float gain = 0.0f; //Volume of player
+  boolean paused = false;
+  boolean loopSingle = false;
+  boolean shuffle;
+  int number;
+  int songNumber = 0;
+  int seek;
+
+  //Stuff for animated toggles
   PImage loopSymbol;
   PImage soundSymbol;
   PImage shuffleSymbol;
   PImage ppSymbol;
-  String message = "Something went wrong.";
   float mSpeakerSize = 50;
   float rSpeakerSize = 50;
   float lSpeakerSize = 50;
-  ControlP5 cp5;
-  Minim minim;
-  String n;
   float loopCircle = 0.0;
-  ArrayList<AudioPlayer> audio = new ArrayList();
-  ArrayList<AudioPlayer> shuffled;
-  AudioPlayer playing;
-  AudioMetaData meta;
-  ArrayList<FFT> ffts = new ArrayList();
-  FFT fft;
-  boolean paused = false;
-  boolean loopSingle = false;
-  boolean shuffle;
+  int shufflePos = 0;
+  int shuffleInc = 1;
+
+  //Error messaging
+  String message = "Something went wrong.";
+  boolean incompatible = false;
+  int messageTimer = 0;
+
+  //Important Objects
   JSONObject data;
   JSONObject playlistObj;
   JSONArray songList;
-  boolean incompatible = false;
-  int messageTimer = 0;
-  int number;
-  int songNumber = 0;
+  ControlP5 cp5;
+  Minim minim;
+  String n;
+  ArrayList<Song> songs = new ArrayList<Song>();
+  ArrayList<Song> shuffles;
+  Song playing;
+  FFT fft;
   Group l;
   Slider seekbar;
   Toggle muter;
@@ -38,8 +54,7 @@ public class Player {
   Bang playButton;
   boolean seeking = false;
   PGraphics actual;
-  int seek;
-  String jPath = sketchPath() + "/data/playlists.json";
+  
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
     loopSymbol = loadImage("loop.png");
     soundSymbol = loadImage("sound.png");
@@ -63,17 +78,16 @@ public class Player {
     actual = createGraphics(width,height,P3D);
     for (int i = 0; i < songList.size(); i++) {
       JSONObject s = (JSONObject) songList.get(i);
-      AudioPlayer a = minim.loadFile(s.getString("path"));
-      FFT fast = new FFT(a.bufferSize(), a.sampleRate());
-      fast.noAverages();
       try {
-        audio.add(minim.loadFile(s.getString("path")));
-        ffts.add(fast);
+        Song so = new Song(minim,s.getString("path"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
+        songs.add(so);
+        fft = so.fft;
       }
       catch (NullPointerException e){
         try {
-          audio.add(minim.loadFile(s.getString("path2")));
-          ffts.add(fast);
+          Song so = new Song(minim,s.getString("path2"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
+          songs.add(so);
+          fft = so.fft;
         }
         catch (NullPointerException e2) {
           incompatible = true;
@@ -88,65 +102,61 @@ public class Player {
     cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
 
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
-    if (audio.size()!=0) {
-      playing = audio.get(0);
-      playing.setGain(gain);
-      playing.play(0);
-      fft = ffts.get(0);
-      seekbar.setRange(0,playing.length());
-      shuffled = (ArrayList<AudioPlayer>)audio.clone();
-      Collections.shuffle(shuffled);
+    if (songs.size()!=0) {
+      playing = songs.get(0);
+      playing.audio.setGain(gain);
+      playing.audio.play(0);
+      fft = songs.get(0).fft;
+      println(songs.get(0));
+      seekbar.setRange(0,playing.audio.length());
+      shuffles = (ArrayList<Song>)songs.clone();
+      Collections.shuffle(shuffles);
     }
   }
 
   void songAppend(File f) {
-    AudioPlayer a;
     try {
-      a = minim.loadFile(f.getAbsolutePath());
-      ffts.add(new FFT(a.bufferSize(), a.sampleRate()));
-      audio.add(a);
+      Song s = new Song(minim,f.getAbsolutePath(),songs.size()+1);
+      songs.add(s);
+      println(songs.get(songs.size()-1).position);
       String path = sketchPath() + "/data/Library/" + n + "/" + f.getName();
       createOutput(path);
       saveBytes(path,loadBytes(f.getAbsolutePath()));
-      AudioMetaData meta = a.getMetaData();
       JSONObject song = new JSONObject();
-      if (meta.title() != "") {
-        song.put("title", meta.title());
-        cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setText(meta.title()).setPosition(0,5+37*songList.size()).setGroup(l);
-        //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20 + songList.size() * 37).setGroup(l).setLabel("play").plugTo(this);
-      } else {
-        song.put("title", meta.fileName().substring(meta.fileName().lastIndexOf("/")+1,meta.fileName().length()-4));
-        cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setGroup(l).setText(meta.fileName().substring(meta.fileName().lastIndexOf("/")+1,meta.fileName().length()-4)).setPosition(0,5+37*songList.size());
-        //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
-        cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20 + songList.size() * 37).setGroup(l).setLabel("play").plugTo(this);
-      }
-      song.put("author", meta.author());
-      song.put("album", meta.album());
+      song.put("title", s.title);
+      cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setText(s.title).setPosition(0,5+37*songList.size()).setGroup(l);
+      //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+      cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20 + songList.size() * 37).setGroup(l).setLabel("play").plugTo(this);
+      song.put("author", s.artist);
+      song.put("album", s.album);
       song.put("path", path);
       song.put("path2",f.getAbsolutePath());
+      song.put("left",color(0,255,255));
+      song.put("right",color(255,0,0));
+      song.put("mix",color(255));
+      song.put("number",songs.size());
       songList.append(song);
       playlistObj.put("songs", songList);
       data.getJSONArray("playlists").setJSONObject(number, playlistObj);
       saveJSONObject(data, jPath);
       songNumber = songList.size()-1;
       if (playing != null){
-        playing.pause();
-        playing = a;
-        playing.setGain(gain);
-        playing.play(0);
-        seekbar.setRange(0,playing.length());
-        fft = ffts.get(songNumber);
+        playing.audio.pause();
+        playing = s;
+        playing.audio.setGain(gain);
+        playing.audio.play(0);
+        seekbar.setRange(0,playing.audio.length());
+        fft = songs.get(songNumber).fft;
       }
       else{
-        playing = a;
-        playing.setGain(gain);
-        playing.play(0);
-        seekbar.setRange(0,playing.length());
-        fft = ffts.get(songNumber);
+        playing = s;
+        playing.audio.setGain(gain);
+        playing.audio.play(0);
+        seekbar.setRange(0,playing.audio.length());
+        fft = songs.get(songNumber).fft;
       }
-      shuffled = (ArrayList<AudioPlayer>)audio.clone();
-      Collections.shuffle(shuffled);
+      shuffles = (ArrayList<Song>)songs.clone();
+      Collections.shuffle(shuffles);
     }
 
     catch (NullPointerException e) {
@@ -165,12 +175,12 @@ public class Player {
 
   void playPause(){
     if (playing != null ){
-      if ( playing.isPlaying()){
-        playing.pause();
+      if ( playing.audio.isPlaying()){
+        playing.audio.pause();
         paused = true;
       }
       else{
-        playing.play();
+        playing.audio.play();
         paused = false;
       }
     }
@@ -179,36 +189,36 @@ public class Player {
   void controlEvent(ControlEvent e) {
     if (e.getName().contains("play") && e.getName() != "playPause"){
       if (playing != null){
-        playing.pause();
+        playing.audio.pause();
       }
-      playing = audio.get(Integer.parseInt(e.getName().substring(4,e.getName().length())));
+      playing = songs.get(Integer.parseInt(e.getName().substring(4,e.getName().length())));
       songNumber = Integer.parseInt(e.getName().substring(4,e.getName().length()));
-      playing.play(0);
-      playing.setGain(gain);
-      seekbar.setRange(0,playing.length());
-      fft = ffts.get(0);
+      playing.audio.play(0);
+      playing.audio.setGain(gain);
+      seekbar.setRange(0,playing.audio.length());
+      fft = songs.get(0).fft;
     }
     else if (e.getName().contains("remove")){
-      if ( playing == audio.get(Integer.parseInt(e.getName().substring(e.getName().length())))){
-        playing.pause();
+      if ( playing == songs.get(Integer.parseInt(e.getName().substring(e.getName().length())))){
+        playing.audio.pause();
       }
-      audio.remove(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
+      songs.remove(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       songList.remove(Integer.parseInt(e.getName().substring(e.getName().length()-1)));
       playlistObj.put("songs",songList);
       data.getJSONArray("playlists").setJSONObject(number,playlistObj);
       saveJSONObject(data,jPath);
       cp5.remove(String.valueOf(Integer.parseInt(e.getName().substring(e.getName().length()-1))+1));
     }
-    else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.position() && seekbar.isMouseOver()){
-      playing.pause();
-      playing.cue(seek);
-      playing.play();
+    else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.audio.position() && seekbar.isMouseOver()){
+      playing.audio.pause();
+      playing.audio.cue(seek);
+      playing.audio.play();
     }
     else if (e.getName() == "mute" && mousePressed && muter.isMouseOver()){
-      if (p.playing.isMuted()) {
-        p.playing.unmute();
+      if (playing.audio.isMuted()) {
+        playing.audio.unmute();
       } else {
-        p.playing.mute();
+        playing.audio.mute();
       }
     }
   }
@@ -228,26 +238,25 @@ public class Player {
       loopCircle += 0.01;
     }
     if (playing != null){
-      meta = playing.getMetaData();
-      seekbar.setValue(playing.position());
+      seekbar.setValue(playing.audio.position());
       actual.beginDraw();
       if (cp5.isVisible()){
         if (fftType == 0){
           fft.noAverages();
-          fft.forward(playing.left);
-          actual.stroke(0,255,255,255);
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),198,width-202);
             actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
           }
-          fft.forward(playing.right);
-          actual.stroke(255,0,0,255);
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),202,width-198);
             actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
           }
-          fft.forward(playing.mix);
-          actual.stroke(255,255,255,255);
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),200,width-200);
             actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
@@ -255,24 +264,24 @@ public class Player {
         }
         else{
           actual.noFill();
-          fft.forward(playing.left);
-          actual.stroke(0,255,255,255);
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),198,width-202);
             actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
           }
           actual.endShape();
-          fft.forward(playing.right);
-          actual.stroke(255,0,0,255);
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),202,width-198);
             actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
           }
           actual.endShape();
-          fft.forward(playing.mix);
-          actual.stroke(255,255,255,255);
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),200,width-200);
@@ -283,28 +292,28 @@ public class Player {
       }
       else{
         if (fftType == 0){
-          fft.forward(playing.left);
-          actual.stroke(0,255,255);
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),-2,width-2);
             actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
           }
-          fft.forward(playing.right);
-          actual.stroke(255,0,0);
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),2,width+2);
             actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
           }
-          fft.forward(playing.mix);
-          actual.stroke(255,255,255);
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),0,width);
             actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
           }
         }
         else{
-          fft.forward(playing.left);
-          actual.stroke(0,255,255);
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
           actual.noFill();
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
@@ -312,16 +321,16 @@ public class Player {
             actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
           }
           actual.endShape();
-          fft.forward(playing.right);
-          actual.stroke(255,0,0);
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),2,width+2);
             actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
           }
           actual.endShape();
-          fft.forward(playing.mix);
-          actual.stroke(255,255,255);
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
           actual.beginShape();
           for(int i = 0; i < fft.specSize(); i++){
             float xPos = map(i,0,fft.specSize(),0,width);
@@ -335,69 +344,68 @@ public class Player {
       actual.noStroke();
       actual.rect(0,0,actual.width,actual.height);
       actual.noFill();
-      actual.stroke(0, 255,  255);
-      actual.ellipse(width/2, height/2, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
-      actual.stroke(255, 0, 0);
-      actual.ellipse(width/2, height/2, map(playing.right.level(), 0, 1, 0, height), map(playing.right.level(), 0, 1, 0, height));
-      actual.stroke(255);
-      actual.ellipse(width/2, height/2, map(playing.mix.level(), 0, 1, 0, height), map(playing.mix.level(), 0, 1, 0, height));
+      actual.stroke(playing.leftColor);
+      actual.ellipse(width/2, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.stroke(playing.rightColor);
+      actual.ellipse(width/2, height/2, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.stroke(playing.mixColor);
+      actual.ellipse(width/2, height/2, map(playing.audio.mix.level(), 0, 1, 0, height), map(playing.audio.mix.level(), 0, 1, 0, height));
 
-      actual.stroke(0,255,255);
-      actual.ellipse(width/2, height/9*8, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/2, height/9, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/4, height/2, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/2, map(playing.left.level(), 0, 1, 0, height), map(playing.left.level(), 0, 1, 0, height));
+      actual.stroke(playing.leftColor);
+      actual.ellipse(width/2, height/9*8, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/2, height/9, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/4, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
 
-      actual.stroke(255, 0, 0);
-      actual.ellipse(width/4, height/9*8, map(playing.right.level(), 0, 1, 0, height), map(playing.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/9, map(playing.right.level(), 0, 1, 0, height), map(playing.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4, height/9, map(playing.right.level(), 0, 1, 0, height), map(playing.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/9*8, map(playing.right.level(), 0, 1, 0, height), map(playing.right.level(), 0, 1, 0, height));
-      for(int i = 0; i < playing.bufferSize() - 1; i++){
-        float x1 = map( i, 0, playing.bufferSize(), 0, width );
-        float x2 = map( i+1, 0, playing.bufferSize(), 0, width );
-        actual.stroke(0,255,255);
-        actual.line( x1, height/2 + map(playing.left.get(i),-1,1,-100,100), x2, height/2 + map(playing.left.get(i+1),-1,1,-100,100));
-        actual.stroke(255,0,0);
-        actual.line( x1, height/2 + map(playing.right.get(i),-1,1,-100,100), x2, height/2 + map(playing.right.get(i+1),-1,1,-100,100) );
-        actual.stroke(255);
-        actual.line( x1, height/2 + map(playing.mix.get(i),-1,1,-100,100), x2, height/2 + map(playing.mix.get(i+1),-1,1,-100,100) );
+      actual.stroke(playing.rightColor);
+      actual.ellipse(width/4, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      for(int i = 0; i < playing.audio.bufferSize() - 1; i++){
+        float x1 = map( i, 0, playing.audio.bufferSize(), 0, width );
+        float x2 = map( i+1, 0, playing.audio.bufferSize(), 0, width );
+        actual.stroke(playing.leftColor);
+        actual.line( x1, height/2 + map(playing.audio.left.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.left.get(i+1),-1,1,-100,100));
+        actual.stroke(playing.rightColor);
+        actual.line( x1, height/2 + map(playing.audio.right.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.right.get(i+1),-1,1,-100,100) );
+        actual.stroke(playing.mixColor);
+        actual.line( x1, height/2 + map(playing.audio.mix.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.mix.get(i+1),-1,1,-100,100) );
       }
       actual.endDraw();
     }
     if (songList.size() != 0) {
-      if (playing != null && !playing.isPlaying() && !paused){
+      if (playing != null && !playing.audio.isPlaying() && !paused){
         actual.background(0);
         if (!loopSingle){
           songNumber += 1;
         }
-        if (songNumber>=audio.size()){
+        if (songNumber>=songs.size()){
           songNumber = 0;
         }
         if (songNumber<0){
-          songNumber = audio.size() - 1;
+          songNumber = songs.size() - 1;
         }
         if (shuffle){
           if (loopSingle){
-            playing = audio.get(songNumber);
+            playing = songs.get(songNumber);
           }
           else{
-            playing = shuffled.get(songNumber);
+            playing = shuffles.get(songNumber);
           }
         }
         else{
-          playing = audio.get(songNumber);
+          playing = songs.get(songNumber);
         }
-        playing.setGain(gain);
-        playing.cue(0);
-        p.playing.unmute();
-        fft = ffts.get(songNumber);
-        playing.play();
-        if (songNumber >= audio.size()){
+        playing.audio.setGain(gain);
+        playing.audio.cue(0);
+        playing.audio.unmute();
+        fft = songs.get(songNumber).fft;
+        playing.audio.play();
+        if (songNumber >= songs.size()){
           songNumber = 0;
         }
-        meta = playing.getMetaData();
-        seekbar.setRange(0,playing.length());
+        seekbar.setRange(0,playing.audio.length());
       }
     }
     tint(255,255);
@@ -406,15 +414,15 @@ public class Player {
     cp5.draw();
     if (cp5.isVisible()){
       if (playing != null){
-        if (playing.isMuted()){
+        if (playing.audio.isMuted()){
           imageMode(CENTER);
           tint(255,128);
           image(soundSymbol,width-275,height-75,mSpeakerSize,mSpeakerSize);
         }
         else{
-          mSpeakerSize = map(playing.mix.level(),0,1,30,90);
-          rSpeakerSize = map(playing.right.level(),0,1,30,90);
-          lSpeakerSize = map(playing.left.level(),0,1,30,90);
+          mSpeakerSize = map(playing.audio.mix.level(),0,1,30,90);
+          rSpeakerSize = map(playing.audio.right.level(),0,1,30,90);
+          lSpeakerSize = map(playing.audio.left.level(),0,1,30,90);
           imageMode(CENTER);
           tint(0,255,255,255);
           image(soundSymbol,width-277,height-75,lSpeakerSize,lSpeakerSize);
@@ -478,11 +486,11 @@ public class Player {
         textAlign(RIGHT,BOTTOM);
         textSize(20);
         fill(255);
-        int currentMins = floor(playing.position()/1000/60);
-        int currentSecs = floor((playing.position()/1000)%60);
+        int currentMins = floor(playing.audio.position()/1000/60);
+        int currentSecs = floor((playing.audio.position()/1000)%60);
         String formattedCurrentSecs = (String.valueOf(currentSecs).length()<2) ? nf(currentSecs,2,0) : String.valueOf(currentSecs);
-        int fullMins = floor(playing.length()/1000/60);
-        int fullSecs = floor((playing.length()/1000)%60);
+        int fullMins = floor(playing.audio.length()/1000/60);
+        int fullSecs = floor((playing.audio.length()/1000)%60);
         String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
         text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,width-200,height);
       }
