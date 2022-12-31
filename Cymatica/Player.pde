@@ -53,6 +53,8 @@ public class Player {
   Toggle shuffleToggle;
   Bang playButton;
   boolean seeking = false;
+
+  //Buffer for adding overlay effects
   PGraphics actual;
   
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
@@ -114,6 +116,11 @@ public class Player {
     }
   }
 
+  //Song addition functions
+  void addSong() {
+    selectInput("Select a WAV, MP3, or AIFF file.", "songAppend", null, this);
+  }
+  
   void songAppend(File f) {
     try {
       Song s = new Song(minim,f.getAbsolutePath(),songs.size()+1);
@@ -165,14 +172,16 @@ public class Player {
     }
   }
 
-  void addSong() {
-    selectInput("Select a WAV, MP3, or AIFF file.", "songAppend", null, this);
-  }
-  
   void addFolder(){
     selectFolder("Select a folder to add multiple music files.","checkFolder",null,this);
   }
 
+  void checkFolder(File f) {
+  }
+
+  void urlAdd(String url){}
+
+  //Player functions
   void playPause(){
     if (playing != null ){
       if ( playing.audio.isPlaying()){
@@ -186,6 +195,12 @@ public class Player {
     }
   }
 
+  void loopSwitch() {
+    loopSingle = !loopSingle;
+    cp5.get(Toggle.class,"loopSingle").setValue(p.loopSingle);
+  }
+
+  //UI Functionality
   void controlEvent(ControlEvent e) {
     if (e.getName().contains("play") && e.getName() != "playPause"){
       if (playing != null){
@@ -223,157 +238,20 @@ public class Player {
     }
   }
 
-
-  void checkFolder() {
-  }
-
-  void loopSwitch() {
-    loopSingle = !loopSingle;
-  }
-
-  
-
+  //Displays the player
   void display() {
-    if (loopSingle){
-      loopCircle += 0.01;
+    //Rudimentary error messaging
+    if (messageTimer > 50) {
+      incompatible = false;
     }
-    if (playing != null){
-      seekbar.setValue(playing.audio.position());
-      actual.beginDraw();
-      if (cp5.isVisible()){
-        if (fftType == 0){
-          fft.noAverages();
-          fft.forward(playing.audio.left);
-          actual.stroke(playing.leftColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),198,width-202);
-            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-          fft.forward(playing.audio.right);
-          actual.stroke(playing.rightColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),202,width-198);
-            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-          fft.forward(playing.audio.mix);
-          actual.stroke(playing.mixColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),200,width-200);
-            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-        }
-        else{
-          actual.noFill();
-          fft.forward(playing.audio.left);
-          actual.stroke(playing.leftColor);
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),198,width-202);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-          actual.endShape();
-          fft.forward(playing.audio.right);
-          actual.stroke(playing.rightColor);
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),202,width-198);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-          actual.endShape();
-          fft.forward(playing.audio.mix);
-          actual.stroke(playing.mixColor);
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),200,width-200);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
-          }
-          actual.endShape();
-        }
-      }
-      else{
-        if (fftType == 0){
-          fft.forward(playing.audio.left);
-          actual.stroke(playing.leftColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),-2,width-2);
-            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-          fft.forward(playing.audio.right);
-          actual.stroke(playing.rightColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),2,width+2);
-            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-          fft.forward(playing.audio.mix);
-          actual.stroke(playing.mixColor);
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),0,width);
-            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-        }
-        else{
-          fft.forward(playing.audio.left);
-          actual.stroke(playing.leftColor);
-          actual.noFill();
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),-2,width-2);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-          actual.endShape();
-          fft.forward(playing.audio.right);
-          actual.stroke(playing.rightColor);
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),2,width+2);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-          actual.endShape();
-          fft.forward(playing.audio.mix);
-          actual.stroke(playing.mixColor);
-          actual.beginShape();
-          for(int i = 0; i < fft.specSize(); i++){
-            float xPos = map(i,0,fft.specSize(),0,width);
-            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
-          }
-          actual.endShape();
-        }
-      }
-      actual.strokeWeight(1);
-      actual.fill(0,50);
-      actual.noStroke();
-      actual.rect(0,0,actual.width,actual.height);
-      actual.noFill();
-      actual.stroke(playing.leftColor);
-      actual.ellipse(width/2, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
-      actual.stroke(playing.rightColor);
-      actual.ellipse(width/2, height/2, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
-      actual.stroke(playing.mixColor);
-      actual.ellipse(width/2, height/2, map(playing.audio.mix.level(), 0, 1, 0, height), map(playing.audio.mix.level(), 0, 1, 0, height));
-
-      actual.stroke(playing.leftColor);
-      actual.ellipse(width/2, height/9*8, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/2, height/9, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/4, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
-
-      actual.stroke(playing.rightColor);
-      actual.ellipse(width/4, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
-      actual.ellipse(width/4*3, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
-      for(int i = 0; i < playing.audio.bufferSize() - 1; i++){
-        float x1 = map( i, 0, playing.audio.bufferSize(), 0, width );
-        float x2 = map( i+1, 0, playing.audio.bufferSize(), 0, width );
-        actual.stroke(playing.leftColor);
-        actual.line( x1, height/2 + map(playing.audio.left.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.left.get(i+1),-1,1,-100,100));
-        actual.stroke(playing.rightColor);
-        actual.line( x1, height/2 + map(playing.audio.right.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.right.get(i+1),-1,1,-100,100) );
-        actual.stroke(playing.mixColor);
-        actual.line( x1, height/2 + map(playing.audio.mix.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.mix.get(i+1),-1,1,-100,100) );
-      }
-      actual.endDraw();
+    if (incompatible) {
+      messageTimer ++;
+      textAlign(CENTER, BOTTOM);
+      fill(255);
+      text(message, width/2, height-20);
     }
+
+    //Logic for auto progression and playlist loop
     if (songList.size() != 0) {
       if (playing != null && !playing.audio.isPlaying() && !paused){
         actual.background(0);
@@ -408,12 +286,193 @@ public class Player {
         seekbar.setRange(0,playing.audio.length());
       }
     }
+
+    //Animates loop symbol
+    if (loopSingle){
+      loopCircle += 0.01;
+    }
+    if (playing != null){
+      seekbar.setValue(playing.audio.position()); //Updates seekbar
+      actual.beginDraw();
+      if (cp5.isVisible()){ //Display FFT over seekbar
+        if (fftType == 0){ //Display FFT as bar graph
+          //Left FFT
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),198,width-202);
+            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+
+          //Right FFT
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),202,width-198);
+            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+
+          //Mix FFT
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),200,width-200);
+            actual.line(xPos,height-40,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+        }
+        else{ //Display FFT as line plot
+          actual.noFill();
+
+          //Left FFT
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),198,width-202);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+          actual.endShape();
+
+          //Right FFT
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),202,width-198);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+          actual.endShape();
+
+          //Mix FFT
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),200,width-200);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/4 - 40);
+          }
+          actual.endShape();
+        }
+      }
+      else{ //Display FFT on bottom of screen
+        if (fftType == 0){ //Bars
+
+          //left
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),-2,width-2);
+            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+
+          //right
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),2,width+2);
+            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+
+          //mix
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),0,width);
+            actual.line(xPos,height,xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+        }
+        else{ //line
+
+          //left
+          fft.forward(playing.audio.left);
+          actual.stroke(playing.leftColor);
+          actual.noFill();
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),-2,width-2);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+          actual.endShape();
+
+          //right
+          fft.forward(playing.audio.right);
+          actual.stroke(playing.rightColor);
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),2,width+2);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+          actual.endShape();
+
+          //mix
+          fft.forward(playing.audio.mix);
+          actual.stroke(playing.mixColor);
+          actual.beginShape();
+          for(int i = 0; i < fft.specSize(); i++){
+            float xPos = map(i,0,fft.specSize(),0,width);
+            actual.vertex(xPos,height - fft.getBand(i)*(float)Math.log(i+5)/3);
+          }
+          actual.endShape();
+        }
+      }
+      actual.strokeWeight(1);
+
+      //To create the nice after image effect
+      actual.fill(0,40);
+      actual.noStroke();
+      actual.rect(0,0,actual.width,actual.height);
+
+      actual.noFill();
+      //Ellipses represnting left volumes (horizontal and vertical)
+      actual.stroke(playing.leftColor);
+      actual.ellipse(width/2, height/9*8, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/2, height/9, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/4, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+      actual.ellipse(width/2, height/2, map(playing.audio.left.level(), 0, 1, 0, height), map(playing.audio.left.level(), 0, 1, 0, height));
+
+      //Ellipses representing right volumes (diagonals)
+      actual.stroke(playing.rightColor);
+      actual.ellipse(width/4, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4, height/9, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/4*3, height/9*8, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+      actual.ellipse(width/2, height/2, map(playing.audio.right.level(), 0, 1, 0, height), map(playing.audio.right.level(), 0, 1, 0, height));
+
+      //Ellipse for mix Level (center)
+      actual.stroke(playing.mixColor);
+      actual.ellipse(width/2, height/2, map(playing.audio.mix.level(), 0, 1, 0, height), map(playing.audio.mix.level(), 0, 1, 0, height));
+
+      //Audio waveforms
+      for(int i = 0; i < playing.audio.bufferSize() - 1; i++){
+        float x1 = map( i, 0, playing.audio.bufferSize(), 0, width );
+        float x2 = map( i+1, 0, playing.audio.bufferSize(), 0, width );
+
+        //Left
+        actual.stroke(playing.leftColor);
+        actual.line( x1, height/2 + map(playing.audio.left.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.left.get(i+1),-1,1,-100,100));
+
+        //Right
+        actual.stroke(playing.rightColor);
+        actual.line( x1, height/2 + map(playing.audio.right.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.right.get(i+1),-1,1,-100,100) );
+
+        //Mix
+        actual.stroke(playing.mixColor);
+        actual.line( x1, height/2 + map(playing.audio.mix.get(i),-1,1,-100,100), x2, height/2 + map(playing.audio.mix.get(i+1),-1,1,-100,100) );
+      }
+      actual.endDraw();
+    }
+    //Display buffer graphic
     tint(255,255);
     imageMode(CORNER);
     image(actual,0,0);
+
+    //Draws controls before some elements, to create the animated buttons
     cp5.draw();
     if (cp5.isVisible()){
       if (playing != null){
+
+        //Mute button animation
         if (playing.audio.isMuted()){
           imageMode(CENTER);
           tint(255,128);
@@ -435,6 +494,8 @@ public class Player {
         image(ppSymbol,width/2,height-75,mSpeakerSize,mSpeakerSize);
         
       }
+
+      //Shuffle button animation
       if (shuffle){
         shufflePos += 1;
         if (shufflePos <= 33){
@@ -464,6 +525,8 @@ public class Player {
         tint(255,128);
         image(shuffleSymbol,width-325,height-75,40,50);
       }
+
+      //Loop button animation
       pushMatrix();
       translate(width-225,height-75);
       rotate(loopCircle);
@@ -475,12 +538,16 @@ public class Player {
       textSize(25);
       fill(255,loopSingle?255:128);
       text("1",width-225,height-79);
+
+      //Displays Playlist name in top right
       stroke(255);
       fill(255);
-      textAlign(LEFT, TOP);
+      textAlign(RIGHT, TOP);
       textSize(30);
-      text(n, width - 200, 0);
+      text(n, width, 0);
       textSize(10);
+
+      //Displays time position of song
       textAlign(LEFT,BOTTOM);
       if (playing != null){
         textAlign(RIGHT,BOTTOM);
@@ -494,15 +561,6 @@ public class Player {
         String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
         text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,width-200,height);
       }
-    }
-    if (messageTimer > 50) {
-      incompatible = false;
-    }
-    if (incompatible) {
-      messageTimer ++;
-      textAlign(CENTER, BOTTOM);
-      fill(255);
-      text(message, width/2, height-20);
     }
   }
 }

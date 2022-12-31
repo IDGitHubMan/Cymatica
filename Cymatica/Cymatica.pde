@@ -151,8 +151,7 @@ void keyPressed() {
     }
 
     if (key == 'r' && !cp5.get(Textfield.class,"playlistName").isFocus() || key == 'l' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
-      p.loopSingle = !p.loopSingle;
-      cp5.get(Toggle.class,"loopSingle").setValue(p.loopSingle);
+      p.loopSwitch();
     }
 
     if (key == 's' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
