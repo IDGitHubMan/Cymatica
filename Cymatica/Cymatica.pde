@@ -6,6 +6,7 @@ import ddf.minim.signals.*;
 import ddf.minim.spi.*;
 import ddf.minim.ugens.*;
 import java.util.*;
+import javax.sound.sampled.*;
 Player p;
 
 JSONObject json;

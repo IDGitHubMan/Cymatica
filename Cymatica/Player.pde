@@ -40,6 +40,7 @@ public class Player {
   JSONObject data;
   JSONObject playlistObj;
   JSONArray songList;
+  Mixer.Info[] mixerInfo;
   ControlP5 cp5;
   Minim minim;
   String n;
@@ -58,26 +59,45 @@ public class Player {
   PGraphics actual;
   
   Player(ControlP5 controller, Minim m, String name, JSONObject p, int num) {
-    loopSymbol = loadImage("loop.png");
-    soundSymbol = loadImage("sound.png");
-    shuffleSymbol = loadImage("shuffle.png");
-    shuffleSymbol.resize(40,50);
-    ppSymbol = loadImage("pp.png");
     data = p;
     n = name;
     minim = m;
     number = num;
     cp5 = controller;
+
+    //Load images for GUI
+    loopSymbol = loadImage("loop.png");
+    soundSymbol = loadImage("sound.png");
+    shuffleSymbol = loadImage("shuffle.png");
+    shuffleSymbol.resize(40,50);
+    ppSymbol = loadImage("pp.png");
+
+    //Set up controls and GUI
+    //The list of songs
     l = cp5.addGroup("list").setPosition(0,20).setWidth(200).setBackgroundColor(0).setMoveable(true);
+
+    //The seekbar
     seekbar = cp5.addSlider("seek").setPosition(200,height - 40).setWidth(width-400).setCaptionLabel("").plugTo(this);
     seekbar.getValueLabel().hide();
+
+    //Add loop toggle
     cp5.addToggle("loopSingle").setPosition(width-250,height-100).setSize(50,50).setCaptionLabel("").plugTo(this).setValue(loopSingle);
+
+    //Add mute toggle
     muter = cp5.addToggle("mute").setPosition(width-300,height-100).setSize(50,50).setCaptionLabel("").plugTo(this).setValue(true);
+
+    //Add shuffle toggle
     shuffleToggle = cp5.addToggle("shuffle").setPosition(width-350,height-100).setSize(50,50).setCaptionLabel("").plugTo(this).setValue(shuffle);
+
+    //Play/Pause button
     playButton = cp5.addBang("playPause").setPosition(width/2-25,height-100).setSize(50,50).setCaptionLabel("").plugTo(this);
+
+    //Access JSON file for data
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
     actual = createGraphics(width,height,P3D);
+
+    //Load songs and create visuals for each
     for (int i = 0; i < songList.size(); i++) {
       JSONObject s = (JSONObject) songList.get(i);
       try {
@@ -85,6 +105,8 @@ public class Player {
         songs.add(so);
         fft = so.fft;
       }
+
+      //Checks if song is in original location, if local check fails
       catch (NullPointerException e){
         try {
           Song so = new Song(minim,s.getString("path2"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
@@ -97,13 +119,22 @@ public class Player {
           continue;
         }
       }
+      // Text displaying song name
       cp5.addTextlabel("title" + String.valueOf(i)).setText(s.getString("title")).setPosition(0,5+37*i).setGroup(l);
+      
+      //Remove song button (to be added in later)
       //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
+
+      //Play button
       cp5.addButton("play"+String.valueOf(i)).setPosition(0,20 + i * 37).setLabel("play").plugTo(this).setGroup(l);
     }
+
+    //Button for adding songs from disk
     cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
 
     //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
+
+    //STart playing the first song, if available
     if (songs.size()!=0) {
       playing = songs.get(0);
       playing.audio.setGain(gain);
@@ -111,6 +142,8 @@ public class Player {
       fft = songs.get(0).fft;
       println(songs.get(0));
       seekbar.setRange(0,playing.audio.length());
+
+      //Create shuffled list of songs
       shuffles = (ArrayList<Song>)songs.clone();
       Collections.shuffle(shuffles);
     }
