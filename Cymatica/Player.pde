@@ -1,27 +1,24 @@
 public class Player {
   //Super important path builder
-  String jPath = sketchPath() + "/data/playlists.json";
+  String jPath;
 
   //Visualizer settings
-  boolean showLeft = true; //Include left vis
-  boolean showRight = true; //Include right vis
-  int fftType = 0; // Bar or plot FFT
-  int linAvgNum = 30; //Number of bands for linear averaging
-  int logAvgWidth = 22; //Logarithmic average octave width (in hertz)
-  int logAvgBands = 3; //Number of bands to split each octave into
+  int visualizerType, fftType, linAvgNum, logAvgWidth, logAvgBands;
+  boolean showLeft, showRight;
+  
+  //Default visualizer type settings
+  boolean showFFT, showWaveform, showCircles, waveLimit;
+  int waveformMax, wavePos, fftPos, circleMode;
 
   //Internal player values
   float gain = 0.0f; //Volume of player
   boolean paused, loopSingle, shuffle;
-  int number, seek;
-  int songNumber = 0;
+  int number, seek, songNumber;
 
   //Stuff for animated toggles
   PImage loopSymbol, soundSymbol, shuffleSymbol, ppSymbol;
-  float mSpeakerSize, rSpeakerSize, lSpeakerSize;
-  float loopCircle = 0.0;
-  int shufflePos = 0;
-  int shuffleInc = 1;
+  float mSpeakerSize, rSpeakerSize, lSpeakerSize, loopCircle;
+  int shufflePos, shuffleInc;
 
   //Error messaging
   String message = "Something went wrong.";
@@ -35,16 +32,18 @@ public class Player {
   ControlP5 cp5;
   Minim minim;
   String n;
-  ArrayList<Song> songs = new ArrayList<Song>();
-  ArrayList<Song> shuffles;
+  ArrayList<Song> songs, shuffles;
   Song playing;
   FFT fft;
+
+  //Controller Objects
   Group l;
   Slider seekbar, volControl;
   Toggle muter;
   Toggle shuffleToggle;
   Bang playButton;
-  boolean seeking = false;
+  Textfield playlistTitleEdit, songTitleEdit, songArtistEdit, songAlbumEdit;
+  Textlabel playlistTitle, songTitle, songArtist, songAlbum;
 
   //Buffer for adding overlay effects
   PGraphics actual;
@@ -54,12 +53,25 @@ public class Player {
     n = name;
     minim = m;
     number = num;
+    songNumber = 0;
     cp5 = controller;
+    jPath = sketchPath() + "/data/playlists.json";
+    songs = new ArrayList<Song>();
 
-    //
+    //Animation stuff
     mSpeakerSize = 50;
     rSpeakerSize = 50;
     lSpeakerSize = 50;
+    shufflePos = 0;
+    shuffleInc = 1;
+    loopCircle = 0.0f;
+
+    //Initial visualizer settings
+    linAvgNum = 30;
+    visualizerType = 0;
+    fftType = 0;
+    logAvgWidth = 22;
+    logAvgBands = 3;
 
     //Load images for GUI
     loopSymbol = loadImage("loop.png");
@@ -73,6 +85,7 @@ public class Player {
     //Add settings tab for all settings
     cp5.addTab("settingsTab").getCaptionLabel().hide();
     cp5.getDefaultTab().getCaptionLabel().hide();
+
     //The list of songs
     l = cp5.addGroup("list").setPosition(0,30).setWidth(200).setBackgroundColor(0).setMoveable(true);
 
@@ -103,9 +116,10 @@ public class Player {
 
     //Load songs and create visuals for each
     for (int i = 0; i < songList.size(); i++) {
+      Song so;
       JSONObject s = (JSONObject) songList.get(i);
       try {
-        Song so = new Song(minim,s.getString("path"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
+        so = new Song(minim,s.getString("path"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
         songs.add(so);
         fft = so.fft;
       }
@@ -113,7 +127,7 @@ public class Player {
       //Checks if song is in original location, if local check fails
       catch (NullPointerException e){
         try {
-          Song so = new Song(minim,s.getString("path2"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
+          so = new Song(minim,s.getString("path2"),s.getString("author"),s.getString("title"),s.getString("album"),s.getInt("number"),s.getInt("left"),s.getInt("right"),s.getInt("mix"));
           songs.add(so);
           fft = so.fft;
         }
@@ -123,14 +137,17 @@ public class Player {
           continue;
         }
       }
-      // Text displaying song name
-      cp5.addTextlabel("title" + String.valueOf(i)).setText(s.getString("title")).setPosition(0,5+37*i).setGroup(l);
       
-      //Remove song button (to be added in later)
-      //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
+      if (so != null){
+        // Text displaying song name
+        cp5.addTextlabel("title" + String.valueOf(i)).setText(so.title).setPosition(0,5+37*i).setGroup(l);
 
-      //Play button
-      cp5.addButton("play"+String.valueOf(i)).setPosition(0,20 + i * 37).setLabel("play").plugTo(this).setGroup(l);
+        //Play button
+        cp5.addButton("play"+String.valueOf(i)).setPosition(0,20 + i * 37).setLabel("play").plugTo(this).setGroup(l);
+
+        //Remove song button (to be added in later)
+        //cp5.addButton("remove"+ String.valueOf(i)).setPosition(0,20).setGroup(String.valueOf(i+1)).setLabel("Remove").plugTo(this);
+      }
     }
 
     //Button for adding songs from disk
@@ -347,17 +364,6 @@ public class Player {
 
   //Displays the player
   void display() {
-    //Rudimentary error messaging
-    if (messageTimer > 50) {
-      incompatible = false;
-    }
-    if (incompatible) {
-      messageTimer ++;
-      textAlign(CENTER, BOTTOM);
-      fill(255);
-      text(message, width/2, height-20);
-    }
-
     //Logic for auto progression and playlist loop
     if (songList.size() != 0) {
       if (playing != null && !playing.audio.isPlaying() && !paused){
@@ -649,19 +655,19 @@ public class Player {
       text("1",width-225,height-79);
 
       //Displays Playlist name in top right
-      stroke(255);
       fill(255);
       textAlign(RIGHT, TOP);
       textSize(30);
-      text(n, width, 0);
+      text(n, width-5, 0);
       textSize(10);
+
+
 
       //Displays time position of song
       textAlign(LEFT,BOTTOM);
       if (playing != null){
         textAlign(RIGHT,BOTTOM);
         textSize(20);
-        fill(255);
         int currentMins = floor(playing.audio.position()/1000/60);
         int currentSecs = floor((playing.audio.position()/1000)%60);
         String formattedCurrentSecs = (String.valueOf(currentSecs).length()<2) ? nf(currentSecs,2,0) : String.valueOf(currentSecs);
@@ -669,7 +675,22 @@ public class Player {
         int fullSecs = floor((playing.audio.length()/1000)%60);
         String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
         text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,width-200,height);
+        textSize(15);
+        textAlign(LEFT,TOP);
+        text(playing.title,width-200,65);
       }
     }
+
+    //Rudimentary error messaging
+    if (messageTimer > 50) {
+      incompatible = false;
+    }
+    if (incompatible) {
+      messageTimer ++;
+      textAlign(CENTER, BOTTOM);
+      fill(255);
+      text(message, width/2, height-20);
+    }
+    
   }
 }

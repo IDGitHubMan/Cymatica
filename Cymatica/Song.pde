@@ -2,20 +2,22 @@ public class Song{
     Minim m;
     FFT fft;
     AudioPlayer audio;
-    String artist;
-    String title;
-    String album;
+    String artist, title, album, path;
     PImage art;
     int position;
     AudioMetaData meta;
-    color leftColor = color(0,255,255);
-    color rightColor = color(255,0,0);
-    color mixColor = color(255);
+    color leftColor, rightColor, mixColor;
+    boolean laserEffect, sparkEffect, lineEffect;
+    int laserBandMin, laserBandMax, sparkBandMin, sparkBandMax, lineBandMin, lineBandMax;
 
-    Song(Minim minim, String path, int n){
+    Song(Minim minim, String p, int n){
+        path = p;
         m = minim;
         audio = m.loadFile(path);
         meta = audio.getMetaData();
+        leftColor = color(0,255,255);
+        rightColor = color(255,0,0);
+        mixColor = color(255);
         fft = new FFT(audio.bufferSize(),audio.sampleRate());
         if (meta.title() != "") {
             title = meta.title();
