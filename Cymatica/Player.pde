@@ -12,21 +12,16 @@ public class Player {
 
   //Internal player values
   float gain = 0.0f; //Volume of player
-  boolean paused = false;
-  boolean loopSingle = false;
-  boolean shuffle;
-  int number;
+  boolean paused, loopSingle, shuffle;
+  paused = loopSingle = shuffle = false;
+  int number, seek;
   int songNumber = 0;
   int seek;
 
   //Stuff for animated toggles
-  PImage loopSymbol;
-  PImage soundSymbol;
-  PImage shuffleSymbol;
-  PImage ppSymbol;
-  float mSpeakerSize = 50;
-  float rSpeakerSize = 50;
-  float lSpeakerSize = 50;
+  PImage loopSymbol, soundSymbol, shuffleSymbol, ppSymbol;
+  float mSpeakerSize, rSpeakerSize, lSpeakerSize;
+  mSpeakerSize = rSpeakerSize = lSpeakerSize = 50;
   float loopCircle = 0.0;
   int shufflePos = 0;
   int shuffleInc = 1;
@@ -37,8 +32,7 @@ public class Player {
   int messageTimer = 0;
 
   //Important Objects
-  JSONObject data;
-  JSONObject playlistObj;
+  JSONObject data, playlistObj;
   JSONArray songList;
   Mixer.Info[] mixerInfo;
   ControlP5 cp5;
@@ -54,7 +48,6 @@ public class Player {
   Toggle shuffleToggle;
   Bang playButton;
   boolean seeking = false;
-  boolean onSettingsTab = false;
 
   //Buffer for adding overlay effects
   PGraphics actual;
