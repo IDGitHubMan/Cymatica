@@ -170,55 +170,28 @@ void keyPressed() {
     if (keyCode == RIGHT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == RIGHT && doubleCount <= frameRate / 2) {
-          p.songNumber ++;
-          if (p.songNumber >= p.songs.size()) {
-            p.songNumber = 0;
-          }
-          p.playing.audio.pause();
-          if (!p.shuffle){
-            p.playing = p.songs.get(p.songNumber);
-          }
-          else{
-            p.playing = p.shuffles.get(p.songNumber);
-          }
-          p.playing.audio.play(0);
-          p.playing.audio.unmute();
+          p.skipForward();
           lastKey = 0;
         } else {
-          p.playing.audio.cue(p.playing.audio.position() + 5000);
+          p.fiveForward();
         }
       } else {
         lastKey = RIGHT;
-        p.playing.audio.cue(p.playing.audio.position() + 5000);
+        p.fiveForward();
       }
     }
 
     if (keyCode == LEFT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       if (lastKey != 0) {
         if (lastKey == LEFT && doubleCount <= frameRate / 2) {
-          if (p.playing.audio.position() <= 3000){
-            p.songNumber --;
-          }  
-          if (p.songNumber < 0) {
-            p.songNumber = p.songs.size() - 1;
-          }
-          p.playing.audio.pause();
-          if (!p.shuffle){
-            p.playing = p.songs.get(p.songNumber);
-          }
-          else{
-            p.playing = p.shuffles.get(p.songNumber);
-          }
-          p.playing.audio.setGain(p.gain);
-          p.playing.audio.play(0);
-          p.playing.audio.unmute();
+          p.skipBackward();
           lastKey = 0;
         } else {
-          p.playing.audio.cue(p.playing.audio.position() - 5000);
+          p.fiveBackward();
         }
       } else {
         lastKey = LEFT;
-        p.playing.audio.cue(p.playing.audio.position() - 5000);
+        p.fiveBackward();
       }
     }
   }

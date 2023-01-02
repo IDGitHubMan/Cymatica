@@ -54,6 +54,7 @@ public class Player {
   Toggle shuffleToggle;
   Bang playButton;
   boolean seeking = false;
+  boolean onSettingsTab = false;
 
   //Buffer for adding overlay effects
   PGraphics actual;
@@ -73,8 +74,12 @@ public class Player {
     ppSymbol = loadImage("pp.png");
 
     //Set up controls and GUI
+
+    //Add settings tab for all settings
+    cp5.addTab("settings").getCaptionLabel().hide();
+    cp5.getDefaultTab().getCaptionLabel().hide();
     //The list of songs
-    l = cp5.addGroup("list").setPosition(0,20).setWidth(200).setBackgroundColor(0).setMoveable(true);
+    l = cp5.addGroup("list").setPosition(0,30).setWidth(200).setBackgroundColor(0).setMoveable(true);
 
     //The seekbar
     seekbar = cp5.addSlider("seek").setPosition(200,height - 40).setWidth(width-400).setCaptionLabel("").plugTo(this);
@@ -140,7 +145,6 @@ public class Player {
       playing.audio.setGain(gain);
       playing.audio.play(0);
       fft = songs.get(0).fft;
-      println(songs.get(0));
       seekbar.setRange(0,playing.audio.length());
 
       //Create shuffled list of songs
@@ -158,7 +162,6 @@ public class Player {
     try {
       Song s = new Song(minim,f.getAbsolutePath(),songs.size()+1);
       songs.add(s);
-      println(songs.get(songs.size()-1).position);
       String path = sketchPath() + "/data/Library/" + n + "/" + f.getName();
       createOutput(path);
       saveBytes(path,loadBytes(f.getAbsolutePath()));
@@ -233,6 +236,52 @@ public class Player {
     cp5.get(Toggle.class,"loopSingle").setValue(p.loopSingle);
   }
 
+  void skipForward(){
+    songNumber ++;
+    if (songNumber >= songs.size()) {
+      songNumber = 0;
+    }
+    playing.audio.pause();
+    if (!shuffle){
+      playing = songs.get(songNumber);
+    }
+    else{
+      playing = shuffles.get(songNumber);
+    }
+    playing.audio.play(0);
+    playing.audio.unmute();
+    playing.audio.setGain(gain);
+    seekbar.setRange(0,playing.audio.length());
+  }
+
+  void fiveForward(){
+    playing.audio.cue(playing.audio.position() + 5000);
+  }
+
+  void skipBackward(){
+    if (playing.audio.position() <= 3000){
+      songNumber --;
+    }  
+    if (songNumber < 0 ){
+      songNumber = songs.size()-1;
+    }
+    playing.audio.pause();
+    if (!shuffle){
+      playing = songs.get(songNumber);
+    }
+    else{
+      playing = shuffles.get(songNumber);
+    }
+    playing.audio.play(0);
+    playing.audio.unmute();
+    playing.audio.setGain(gain);
+    seekbar.setRange(0,playing.audio.length());
+  }
+
+  void fiveBackward(){
+    playing.audio.cue(playing.audio.position() - 5000);
+  }
+
   //UI Functionality
   void controlEvent(ControlEvent e) {
     if (e.getName().contains("play") && e.getName() != "playPause"){
@@ -268,6 +317,10 @@ public class Player {
       } else {
         playing.audio.mute();
       }
+    }
+
+    else if (e.getName() == "settings"){
+        onSettingsTab = true;
     }
   }
 
@@ -327,7 +380,7 @@ public class Player {
     if (playing != null){
       seekbar.setValue(playing.audio.position()); //Updates seekbar
       actual.beginDraw();
-      if (cp5.isVisible()){ //Display FFT over seekbar
+      if (cp5.isVisible() && !onSettingsTab){ //Display FFT over seekbar
         if (fftType == 0){ //Display FFT as bar graph
           //Left FFT
           fft.forward(playing.audio.left);
@@ -502,7 +555,7 @@ public class Player {
 
     //Draws controls before some elements, to create the animated buttons
     cp5.draw();
-    if (cp5.isVisible()){
+    if (cp5.isVisible() && !onSettingsTab){
       if (playing != null){
 
         //Mute button animation
