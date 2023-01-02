@@ -49,7 +49,7 @@ public class Player {
   Song playing;
   FFT fft;
   Group l;
-  Slider seekbar;
+  Slider seekbar, volControl;
   Toggle muter;
   Toggle shuffleToggle;
   Bang playButton;
@@ -93,6 +93,10 @@ public class Player {
 
     //Add shuffle toggle
     shuffleToggle = cp5.addToggle("shuffle").setPosition(width-350,height-100).setSize(50,50).setCaptionLabel("").plugTo(this).setValue(shuffle);
+
+    //Add volume slider
+    volControl = cp5.addSlider("gain").setPosition(width-350,height-130).setSize(150,25).setCaptionLabel("").plugTo(this).setRange(-60,7).setValue(gain);
+    volControl.getValueLabel().hide();
 
     //Play/Pause button
     playButton = cp5.addBang("playPause").setPosition(width/2-25,height-100).setSize(50,50).setCaptionLabel("").plugTo(this);
@@ -282,8 +286,22 @@ public class Player {
     playing.audio.cue(playing.audio.position() - 5000);
   }
 
+  void volUp(){
+    gain += 1;
+    //playing.audio.setGain(gain);
+    volControl.setValue(gain);
+  }
+
+  void volDown(){
+    gain -= 1;
+    //playing.audio.setGain(gain);
+    volControl.setValue(gain);
+  }
+
   //UI Functionality
   void controlEvent(ControlEvent e) {
+
+    //Individual song play
     if (e.getName().contains("play") && e.getName() != "playPause"){
       if (playing != null){
         playing.audio.pause();
@@ -295,6 +313,8 @@ public class Player {
       seekbar.setRange(0,playing.audio.length());
       fft = songs.get(0).fft;
     }
+
+    // (Faulty) Song Removal
     else if (e.getName().contains("remove")){
       if ( playing == songs.get(Integer.parseInt(e.getName().substring(e.getName().length())))){
         playing.audio.pause();
@@ -306,21 +326,27 @@ public class Player {
       saveJSONObject(data,jPath);
       cp5.remove(String.valueOf(Integer.parseInt(e.getName().substring(e.getName().length()-1))+1));
     }
+
+    //Seekbar
     else if (e.getName() == "seek" && mousePressed && e.getValue() != playing.audio.position() && seekbar.isMouseOver()){
       playing.audio.pause();
       playing.audio.cue(seek);
       playing.audio.play();
     }
+
+    //Mute toggle
     else if (e.getName() == "mute" && mousePressed && muter.isMouseOver()){
       if (playing.audio.isMuted()) {
+        volControl.hide();
         playing.audio.unmute();
       } else {
+        volControl.show();
         playing.audio.mute();
       }
     }
 
-    else if (e.getName() == "settings"){
-        onSettingsTab = true;
+    else if (e.getName() == "gain"){
+        playing.audio.setGain(gain);
     }
   }
 
@@ -560,11 +586,13 @@ public class Player {
 
         //Mute button animation
         if (playing.audio.isMuted()){
+          volControl.hide();
           imageMode(CENTER);
           tint(255,128);
           image(soundSymbol,width-275,height-75,mSpeakerSize,mSpeakerSize);
         }
         else{
+          volControl.show();
           mSpeakerSize = map(playing.audio.mix.level(),0,1,30,90);
           rSpeakerSize = map(playing.audio.right.level(),0,1,30,90);
           lSpeakerSize = map(playing.audio.left.level(),0,1,30,90);

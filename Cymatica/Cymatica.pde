@@ -158,13 +158,11 @@ void keyPressed() {
     }
 
     if (keyCode == UP) {
-      p.gain = p.playing.audio.getGain() + 1;
-      p.playing.audio.setGain(p.gain);
+      p.volUp();
     }
 
     if (keyCode == DOWN) {
-      p.gain = p.playing.audio.getGain() - 1;
-      p.playing.audio.setGain(p.gain);
+      p.volDown();
     }
 
     if (keyCode == RIGHT && !cp5.get(Textfield.class,"playlistName").isFocus()) {
