@@ -76,7 +76,7 @@ public class Player {
     //Set up controls and GUI
 
     //Add settings tab for all settings
-    cp5.addTab("settings").getCaptionLabel().hide();
+    cp5.addTab("settingsTab").getCaptionLabel().hide();
     cp5.getDefaultTab().getCaptionLabel().hide();
     //The list of songs
     l = cp5.addGroup("list").setPosition(0,30).setWidth(200).setBackgroundColor(0).setMoveable(true);
@@ -380,7 +380,7 @@ public class Player {
     if (playing != null){
       seekbar.setValue(playing.audio.position()); //Updates seekbar
       actual.beginDraw();
-      if (cp5.isVisible() && !onSettingsTab){ //Display FFT over seekbar
+      if (cp5.isVisible() && !cp5.getTab("settingsTab").isActive()){ //Display FFT over seekbar
         if (fftType == 0){ //Display FFT as bar graph
           //Left FFT
           fft.forward(playing.audio.left);
@@ -555,7 +555,7 @@ public class Player {
 
     //Draws controls before some elements, to create the animated buttons
     cp5.draw();
-    if (cp5.isVisible() && !onSettingsTab){
+    if (cp5.isVisible() && !cp5.getTab("settingsTab").isActive()){
       if (playing != null){
 
         //Mute button animation
