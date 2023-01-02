@@ -13,15 +13,12 @@ public class Player {
   //Internal player values
   float gain = 0.0f; //Volume of player
   boolean paused, loopSingle, shuffle;
-  paused = loopSingle = shuffle = false;
   int number, seek;
   int songNumber = 0;
-  int seek;
 
   //Stuff for animated toggles
   PImage loopSymbol, soundSymbol, shuffleSymbol, ppSymbol;
   float mSpeakerSize, rSpeakerSize, lSpeakerSize;
-  mSpeakerSize = rSpeakerSize = lSpeakerSize = 50;
   float loopCircle = 0.0;
   int shufflePos = 0;
   int shuffleInc = 1;
@@ -58,6 +55,11 @@ public class Player {
     minim = m;
     number = num;
     cp5 = controller;
+
+    //
+    mSpeakerSize = 50;
+    rSpeakerSize = 50;
+    lSpeakerSize = 50;
 
     //Load images for GUI
     loopSymbol = loadImage("loop.png");
