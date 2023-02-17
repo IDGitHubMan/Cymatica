@@ -1,8 +1,7 @@
-*/.DS_Store
-.DS_Store
-*/macos-x86_64
-*/macos-aarch64/
+*.DS_Store
+*macos-x86_64
+*macos-aarch64
 *.json
 *.autosave
-*/windows-amd64/
+*windows-amd64
 *Library
