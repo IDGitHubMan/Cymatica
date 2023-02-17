@@ -1,11 +1,8 @@
 */.DS_Store
 .DS_Store
 */macos-x86_64
-*/macos-x86_64
 */macos-aarch64/
-*/data/
-SoundViz/Scatman John - I'm A scatman.mp3
-Cymatica/playlists.json
+*.json
 *.autosave
 */windows-amd64/
-*/Library
+*Library
