@@ -37,13 +37,13 @@ void setup() {
   }
   json = loadJSONObject(path);
   cp5.addTextfield("playlistName")
-    .setSize(200, 50)
     .setPosition(width / 2 - 100, height / 2)
     .setValue("Awesome Sauce")
+    .setCaptionLabel("NEW PLAYLIST")
     .getCaptionLabel()
     .align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE);
-  cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width / 2 - 100, height / 2 + 100).setHeight(height / 2 - 200).setItemHeight(50);
-  cp5.addGroup("otherPlayers").setPosition(width - 200, 85).setLabel("Other Players").setSize(200, 20).hide().setBackgroundColor(0);
+  cp5.addScrollableList("playlistSelector").setSize(200, 50).setPosition(width / 2 - 100, height / 2 + 35).setHeight(height / 2 - 200).setItemHeight(50);
+  cp5.addGroup("otherPlayers").setPosition(width - 200, height/2).setLabel("Other Players").setSize(200, 20).hide().setBackgroundColor(0);
 }
 
 void draw() {
@@ -88,6 +88,7 @@ void draw() {
 
 //Handle home screen controls
 void controlEvent(ControlEvent event) {
+  //println(event.getName());
   if (event.getName() == "playlistSelector") { //Loads an existing playlist
     JSONObject ob = (JSONObject) json.getJSONArray("playlists").get((int)cp5.get(ScrollableList.class, "playlistSelector").getValue());
     String title = ob.getString("name");
@@ -97,10 +98,10 @@ void controlEvent(ControlEvent event) {
     }
     p = new Player(cp5, minim, title, json, (int) cp5.get(ScrollableList.class, "playlistSelector").getValue());
     playlistSelected = true;
-    cp5.get(Textfield.class, "playlistName").setGroup("otherPlayers").setPosition(0, 5);
-    cp5.get(ScrollableList.class, "playlistSelector").setGroup("otherPlayers").setPosition(0, 70).setHeight(height - 140);
+    cp5.get(Textfield.class, "playlistName").setGroup("otherPlayers").setPosition(0, 5).setValue("");
+    cp5.get(ScrollableList.class, "playlistSelector").setGroup("otherPlayers").setPosition(0, 40).setHeight(height - 140);
     cp5.get(Group.class, "otherPlayers").show();
-  } else if (event.getName() == "makePlaylist" || event.getName() == "playlistName") { //Creates a new playlist
+  } else if (event.getName() == "playlistName") { //Creates a new playlist
     if (p != null && p.playing != null) {
       p.playing.audio.pause();
     }
@@ -119,14 +120,14 @@ void controlEvent(ControlEvent event) {
     }
     p = new Player(cp5, minim, name, json, json.getJSONArray("playlists").size()-1);
     playlistSelected = true;
-    cp5.get(Textfield.class, "playlistName").setGroup("otherPlayers").setPosition(0, 5);
-    cp5.get(ScrollableList.class, "playlistSelector").setGroup("otherPlayers").setPosition(0, 70).setHeight(height - 140);
+    cp5.get(Textfield.class, "playlistName").setGroup("otherPlayers").setPosition(0, 5).setValue("");
+    cp5.get(ScrollableList.class, "playlistSelector").setGroup("otherPlayers").setPosition(0, 40).setHeight(height - 140);
     cp5.get(Group.class, "otherPlayers").show();
   }
 }
 
 void keyPressed() {
-  if (p != null) {
+  if (p != null && p.playing != null) {
     if ( key == ' ' && !cp5.get(Textfield.class,"playlistName").isFocus()) {
       p.playPause();
     }
