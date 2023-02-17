@@ -24,9 +24,9 @@ void draw() {
     noStroke();
     rect(0,0,width,height);
     //background(0);
-    float rAudLevel = map(audio.right.level(),0,1,0,height);
-    float lAudLevel = map(audio.left.level(),0,1,0,height);
-    float mAudLevel = map(audio.mix.level(),0,1,0,height);
+    float rAudLevel = map(audio.right.level(),0,1,100,height);
+    float lAudLevel = map(audio.left.level(),0,1,100,height);
+    float mAudLevel = map(audio.mix.level(),0,1,100,height);
     float range = 86;
     float proportion = range / fft.specSize();
     float angleAmount = proportion * TWO_PI;
