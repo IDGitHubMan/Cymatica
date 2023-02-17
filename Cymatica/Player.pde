@@ -42,8 +42,7 @@ public class Player {
   Toggle muter;
   Toggle shuffleToggle;
   Bang playButton;
-  Textfield playlistTitleEdit, songTitleEdit, songArtistEdit, songAlbumEdit;
-  Textlabel playlistTitle, songTitle, songArtist, songAlbum;
+  Textlabel playlistTitleEdit, songTitleEdit, songArtistEdit, songAlbumEdit;
 
   //Buffer for adding overlay effects
   PGraphics actual;
@@ -109,6 +108,18 @@ public class Player {
     //Play/Pause button
     playButton = cp5.addBang("playPause").setPosition(width/2-25,height-100).setSize(50,50).setCaptionLabel("").plugTo(this);
 
+    //
+    playlistTitleEdit = cp5.addTextlabel("playlistTitleEdit").setPosition(width-200,5).setText(n);
+
+    //
+    songTitleEdit = cp5.addTextlabel("songTitleEdit").setPosition(width-200,25);
+
+    //
+    songArtistEdit = cp5.addTextlabel("songArtistEdit").setPosition(width-200,40);
+
+    //
+    songAlbumEdit = cp5.addTextlabel("songAlbumEdit").setPosition(width-200,55);
+
     //Access JSON file for data
     playlistObj = (JSONObject) data.getJSONArray("playlists").getJSONObject(num);
     songList = (JSONArray) playlistObj.get("songs");
@@ -151,17 +162,22 @@ public class Player {
     }
 
     //Button for adding songs from disk
-    cp5.addBang("addSong").setPosition(width-200, 50).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
+    cp5.addBang("addSong").setPosition(width-200, 80).plugTo(this).setLabel("Add song").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
+    cp5.addTextlabel("addSongBang1").setPosition(width-150,83).setText("Add song from disk.");
 
-    //cp5.addBang("addFolder").setPosition(60, height-40).plugTo(this).setLabel("Add folder");
+    cp5.addBang("addFolder").setPosition(width-200, 110).plugTo(this).setLabel("Add folder").getCaptionLabel().align(ControlP5.CENTER,ControlP5.CENTER).setPaddingX(5);
+    cp5.addTextlabel("addSongBang2").setPosition(width-150,113).setText("Add songs from folder on disk.");
 
-    //STart playing the first song, if available
+    //Start playing the first song, if available
     if (songs.size()!=0) {
       playing = songs.get(0);
       playing.audio.setGain(gain);
       playing.audio.play(0);
       fft = songs.get(0).fft;
       seekbar.setRange(0,playing.audio.length());
+      songTitleEdit.setValue(playing.title);
+      songArtistEdit.setValue(playing.artist);
+      songAlbumEdit.setValue(playing.album);
 
       //Create shuffled list of songs
       shuffles = (ArrayList<Song>)songs.clone();
@@ -205,6 +221,9 @@ public class Player {
         playing.audio.setGain(gain);
         playing.audio.play(0);
         seekbar.setRange(0,playing.audio.length());
+        songTitleEdit.setValue(playing.title);
+        songArtistEdit.setValue(playing.artist);
+        songAlbumEdit.setValue(playing.album);
         fft = songs.get(songNumber).fft;
       }
       else{
@@ -212,6 +231,9 @@ public class Player {
         playing.audio.setGain(gain);
         playing.audio.play(0);
         seekbar.setRange(0,playing.audio.length());
+        songTitleEdit.setValue(playing.title);
+        songArtistEdit.setValue(playing.artist);
+        songAlbumEdit.setValue(playing.album);
         fft = songs.get(songNumber).fft;
       }
       shuffles = (ArrayList<Song>)songs.clone();
@@ -229,6 +251,63 @@ public class Player {
   }
 
   void checkFolder(File f) {
+    File[] matchingFiles = f.listFiles();
+    for (int i = 0; i < matchingFiles.length; i++){
+      if (matchingFiles[i].getName().contains(".mp3") || matchingFiles[i].getName().contains(".wav")){
+        try{
+          Song s = new Song(minim, matchingFiles[i].getAbsolutePath(),songs.size()+i-1);
+          songs.add(s);
+          String path = sketchPath() + "/data/Library/" + n + "/" + matchingFiles[i].getName();
+          createOutput(path);
+          saveBytes(path,loadBytes(f.getAbsolutePath()));
+          JSONObject song = new JSONObject();
+          song.put("title", s.title);
+          cp5.addTextlabel("title" + String.valueOf(songList.size()+1)).setText(s.title).setPosition(0,5+37*songList.size()).setGroup(l);
+          //cp5.addButton("remove"+ String.valueOf(songList.size()+1)).setPosition(0,20).setGroup(String.valueOf(songList.size()+1)).setLabel("Remove").plugTo(this);
+          cp5.addButton("play"+String.valueOf(songList.size()+1)).setPosition(0,20 + songList.size() * 37).setGroup(l).setLabel("play").plugTo(this);
+          song.put("author", s.artist);
+          song.put("album", s.album);
+          song.put("path", path);
+          song.put("path2",f.getAbsolutePath());
+          song.put("left",color(0,255,255));
+          song.put("right",color(255,0,0));
+          song.put("mix",color(255));
+          song.put("number",songs.size());
+          songList.append(song);
+          playlistObj.put("songs", songList);
+          data.getJSONArray("playlists").setJSONObject(number, playlistObj);
+          saveJSONObject(data, jPath);
+          songNumber = songList.size()-1;
+          if (playing != null){
+            playing.audio.pause();
+            playing = s;
+            playing.audio.setGain(gain);
+            playing.audio.play(0);
+            seekbar.setRange(0,playing.audio.length());
+            songTitleEdit.setValue(playing.title);
+            songArtistEdit.setValue(playing.artist);
+            songAlbumEdit.setValue(playing.album);
+            fft = songs.get(songNumber).fft;
+          }
+          else{
+            playing = s;
+            playing.audio.setGain(gain);
+            playing.audio.play(0);
+            seekbar.setRange(0,playing.audio.length());
+            songTitleEdit.setValue(playing.title);
+            songArtistEdit.setValue(playing.artist);
+            songAlbumEdit.setValue(playing.album);
+            fft = songs.get(songNumber).fft;
+          }
+          shuffles = (ArrayList<Song>)songs.clone();
+          Collections.shuffle(shuffles);
+        }
+        catch (NullPointerException exception){
+          message = matchingFiles[i].getAbsolutePath() + "was incompatible, or not found.";
+        }
+
+      }
+    }
   }
 
   void urlAdd(String url){}
@@ -267,6 +346,9 @@ public class Player {
     playing.audio.play(0);
     playing.audio.unmute();
     playing.audio.setGain(gain);
+    songTitleEdit.setValue(playing.title);
+    songArtistEdit.setValue(playing.artist);
+    songAlbumEdit.setValue(playing.album);
     seekbar.setRange(0,playing.audio.length());
   }
 
@@ -291,6 +373,9 @@ public class Player {
     playing.audio.play(0);
     playing.audio.unmute();
     playing.audio.setGain(gain);
+    songTitleEdit.setValue(playing.title);
+    songArtistEdit.setValue(playing.artist);
+    songAlbumEdit.setValue(playing.album);
     seekbar.setRange(0,playing.audio.length());
   }
 
@@ -312,7 +397,6 @@ public class Player {
 
   //UI Functionality
   void controlEvent(ControlEvent e) {
-
     //Individual song play
     if (e.getName().contains("play") && e.getName() != "playPause"){
       if (playing != null){
@@ -323,6 +407,9 @@ public class Player {
       playing.audio.play(0);
       playing.audio.setGain(gain);
       seekbar.setRange(0,playing.audio.length());
+      songTitleEdit.setValue(playing.title);
+      songArtistEdit.setValue(playing.artist);
+      songAlbumEdit.setValue(playing.album);
       fft = songs.get(0).fft;
     }
 
@@ -358,7 +445,9 @@ public class Player {
     }
 
     else if (e.getName() == "gain"){
-        playing.audio.setGain(gain);
+        if (playing != null){
+          playing.audio.setGain(gain);
+        }
     }
   }
 
@@ -370,29 +459,24 @@ public class Player {
         actual.background(0);
         if (!loopSingle){
           songNumber += 1;
-        }
-        if (songNumber>=songs.size()){
-          songNumber = 0;
-        }
-        if (songNumber<0){
-          songNumber = songs.size() - 1;
-        }
-        if (shuffle){
-          if (loopSingle){
-            playing = songs.get(songNumber);
+          if (songNumber>=songs.size()){
+            songNumber = 0;
           }
-          else{
+          if (shuffle){
             playing = shuffles.get(songNumber);
           }
-        }
-        else{
-          playing = songs.get(songNumber);
+          else{
+            playing = songs.get(songNumber);
+          }
         }
         playing.audio.setGain(gain);
         playing.audio.cue(0);
         playing.audio.unmute();
         fft = songs.get(songNumber).fft;
         playing.audio.play();
+        songTitleEdit.setValue(playing.title);
+        songArtistEdit.setValue(playing.artist);
+        songAlbumEdit.setValue(playing.album);
         if (songNumber >= songs.size()){
           songNumber = 0;
         }
@@ -655,11 +739,11 @@ public class Player {
       text("1",width-225,height-79);
 
       //Displays Playlist name in top right
-      fill(255);
-      textAlign(RIGHT, TOP);
-      textSize(30);
-      text(n, width-5, 0);
-      textSize(10);
+      // fill(255);
+      // textAlign(RIGHT, TOP);
+      // textSize(30);
+      // text(n, width-5, 0);
+      // textSize(10);
 
 
 
@@ -675,9 +759,6 @@ public class Player {
         int fullSecs = floor((playing.audio.length()/1000)%60);
         String formattedFullSecs = (String.valueOf(fullSecs).length()<2) ? nf(fullSecs,2,0) : String.valueOf(fullSecs);
         text( currentMins + ":" + formattedCurrentSecs + "/" + fullMins + ":"+ formattedFullSecs,width-200,height);
-        textSize(15);
-        textAlign(LEFT,TOP);
-        text(playing.title,width-200,65);
       }
     }
 
