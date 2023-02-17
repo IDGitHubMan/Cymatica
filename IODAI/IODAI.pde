@@ -11,7 +11,7 @@ AudioPlayer audio;
 void setup() {
     fullScreen(P3D);
     m = new Minim(this);
-    audio = m.loadFile("/Users/isaiahdesrosiers/Downloads/Going Up Now - APNEA (Tower of God M ： The Great Journey OST).wav");
+    audio = m.loadFile("wane.wav");
     audio.setGain(0);
     audio.loop();
     fft = new FFT(audio.bufferSize(),audio.sampleRate());
@@ -20,7 +20,7 @@ void setup() {
 }
 
 void draw() {
-    fill(0,50);
+    fill(0,32,128,50);
     noStroke();
     rect(0,0,width,height);
     //background(0);
@@ -33,6 +33,7 @@ void draw() {
     float angleCount = (TWO_PI) / angleAmount;
     fft.forward(audio.right);
     stroke(255,0,0);
+    noFill();
     for (int i1 = 0; i1 < angleCount; i1 ++) {
         float start = i1 * angleAmount;
         for (int i = 0; i < range; i++) {
@@ -70,4 +71,6 @@ void draw() {
             point(width / 2 + (fftVal + mAudLevel) * x,height / 2 + (fftVal + mAudLevel) * y);
         }
     }
+    fill(0);
+    ellipse(width / 2,height / 2,2 * min(rAudLevel,lAudLevel,mAudLevel),2 * min(rAudLevel,lAudLevel,mAudLevel));
 }
