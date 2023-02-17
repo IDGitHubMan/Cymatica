@@ -35,7 +35,7 @@ class Player {
         playlistTitle = new GTextField(p, width / 2 - 100, height / 2, 200, 20);
     }
     
-    voiddisplay() {
+    void display() {
         addLocal.setVisible(playlistSelected);
         addUrl.setVisible(playlistSelected);
         addFolder.setVisible(playlistSelected);
@@ -43,32 +43,6 @@ class Player {
             playlistTitle.moveTo(width - 200, 0);
             newPlaylistFromDir.moveTo(width - 200, 30);
             newPlaylist.moveTo(width - 100, 30);
-            if (player == null) {
-                player = new SamplePlayer(ac, sm.getGroup(selectedList).get(0));
-                outs = player.getOuts();
-                player.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
-                g.addInput(player);
-                ac.out.addInput(g);
-                ac.start();
-                //set the background
-                //scan across the pixels
-            } else {
-                noFill();
-                for (intc = 0; c < outs; c++) {
-                    colorMode(HSB,360,100,100);
-                    stroke(random(360),100,100);
-                    beginShape();
-                    for (int i = 0; i < width; i++) {
-                        int buffIndex = i * ac.getBufferSize() / width;
-                        //then work out the pixel height of the audio data at that point
-                        int vOffset = (int)((1 + ac.out.getValue(c, buffIndex)) * height / 2);
-                        vOffset = min(vOffset, height);
-                        vertex(i,vOffset);
-                        //point(i, vOffset);
-                    }
-                    endShape();
-                }
-            }
         } else {
             newPlaylistFromDir.moveTo(width / 2 - 100, height / 2 + 40);
             newPlaylist.moveTo(width / 2, height / 2 + 40);
@@ -85,10 +59,10 @@ class Player {
     }
     
     public void addSong() {
-        }
+    }
     
     public void createPlaylist() {
-        }
+    }
     
     void fileSelected(File selection) {
         String audioFileName = selection.getAbsolutePath();
@@ -97,5 +71,5 @@ class Player {
         g.addInput(player);
         ac.out.addInput(g);
         ac.start();
-        }
     }
+}

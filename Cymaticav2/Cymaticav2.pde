@@ -3,18 +3,59 @@ import beads.*;
 
 Player p;
 String path;
+JSONObject cymatica;
 
 void settings() {
-    size(700, 700, P2D);
+    size(1000, 800, P2D);
 }
 
 void setup() {
     p = new Player(this);
     path = sketchPath() + "/Library/Cymatica.json";
     File f = new File(path);
-    if(!f.isFile()) {
+    if (!f.isFile()) {
         createOutput(path);
-}
+        
+        //Basic, empty JSON stuff
+        cymatica = new JSONObject();
+        JSONArray playlists = new JSONArray();
+        JSONArray songs = new JSONArray();
+        cymatica.put("songs",songs);
+        cymatica.put("playlists",playlists);
+        
+        //General settings
+        cymatica.put("colorMode","constant");
+        cymatica.put("leftColor",color(0,255,255));
+        cymatica.put("rightColor",color(255,0,0));
+        cymatica.put("visualizer","corona");
+        cymatica.put("overlayEffect","none");
+        cymatica.put("overlayType","sample");
+        
+        //Corona visualizer settings
+        cymatica.put("coronaType","fft");
+        cymatica.put("coronaReflection",false);
+        cymatica.put("coronaSpin",false);
+        cymatica.put("coronaMinRadius",50);
+        cymatica.put("coronaMaxRadius",height);
+        cymatica.put("coronaDrawMode","line");
+        cymatica.put("coronaOffset",2);
+        
+        //Cymatics visualizer settings
+        cymatica.put("cymaticsFFTMode","bar");
+        cymatica.put("cymaticsLeftEllipses",true);
+        cymatica.put("cymaticsRightEllipses",true);
+        cymatica.put("cymaticsWaveform",true);
+        cymatica.put("cymaticsWaveformCap",100);
+        cymatica.put("cymaticsEllipseCap",200);
+        
+        //Array visualizer settings
+        cymatica.put("arraySource","fft");
+        
+        saveJSONObject(cymatica,path);
+    }
+    else {
+        cymatica = loadJSONObject(path);
+    }
     surface.setResizable(true);
     surface.setTitle("Cymatica");
 }
@@ -23,20 +64,6 @@ void draw() {
     background(0);
     noFill();
     p.display();
-    //for (int counts = 0; counts < outs; counts++) {
-    //stroke(counts*180, 100, 100);
-    //beginShape();
-    //for (int i = 0; i < width; i++) {
-    ////for each pixel work out where in the current audio buffer we are
-    //int buffIndex = i * ac.getBufferSize() / width;
-    ////then work out the pixel height of the audio data at that point
-    //int vOffset = (int)((1 + ac.out.getValue(counts, buffIndex)) * height / 2);
-    ////draw into Processing's convenient 1-D array of pixels
-    //vOffset = min(vOffset, height);
-    //vertex(i, vOffset);
-//  }
-    //endShape();
-//}
 }
 
 public void handleButtonEvents(GButton button, GEvent event) {
@@ -54,10 +81,41 @@ public void handleButtonEvents(GButton button, GEvent event) {
         
     }
     if (button == p.newPlaylistFromDir) {
-        p.playlistSelected = true;
         String fname = G4P.selectFolder("Select a folder to scan");
-        p.sm.group(p.playlistTitle.getText(),fname);
-        p.selectedList = p.playlistTitle.getText();
-        println(p.sm.groupsAsList());
+        if (fname == "" || fname == null) {
+            G4P.showMessage(this, "No selection was made.", "Action Canceled", G4P.WARN_MESSAGE);
+        }
+        else if (p.playlistTitle.getText().trim() == "" || p.playlistTitle.getText() == null) {
+            G4P.showMessage(this,"You need to name the playlist.","Null Warning",G4P.WARN_MESSAGE);
+        }
+        else{
+            JSONArray playlist = new JSONArray();
+            p.playlistSelected = true;
+            File f = new File(fname);
+            File[]matchingFiles = f.listFiles();
+            for (File song : matchingFiles) {
+                if (song.getName().toLowerCase().contains(".mp3") || song.getName().toLowerCase().contains(".wav") || song.getName().toLowerCase().contains(".aif") || song.getName().toLowerCase().contains(".aiff") || song.getName().toLowerCase().contains(".mid")) {
+                    String path = sketchPath() + "/Library/Songs/" + song.getName();
+                    File localSong = new File(path);
+                    if (!localSong.isFile()) {
+                        saveBytes(sketchPath() + "/Library/Songs/" + song.getName(),loadBytes(song.getAbsolutePath()));
+                        JSONObject s = new JSONObject();
+                        s.put("originalPath",song.getAbsolutePath());
+                        s.put("localPath",sketchPath() + "/Library/Songs/" + song.getName());
+                        s.put("title",song.getName().substring(0,song.getName().lastIndexOf(".")));
+                        s.put("artists","");
+                        s.put("album","");
+                        s.put("laserMin",0);
+                        s.put("laserMax",30);
+                        s.put("laserThreshold",30);
+                        s.put("coronaFFTMin",0);
+                        s.put("coronaFFTMax",86);
+                        s.put("coronaRepetitions",6);
+                        cymatica.getJSONArray("songs").append(s);
+                        saveJSONObject(cymatica,sketchPath() + "/Library/Cymatica.json");
+                    }
+                }
+            }
+        }
     }
 }
