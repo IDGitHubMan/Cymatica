@@ -10,7 +10,6 @@ void settings() {
 }
 
 void setup() {
-    p = new Player(this);
     path = sketchPath() + "/Library/Cymatica.json";
     File f = new File(path);
     if (!f.isFile()) {
@@ -58,6 +57,7 @@ void setup() {
     }
     surface.setResizable(true);
     surface.setTitle("Cymatica");
+    p = new Player(this,cymatica);
 }
 
 void draw() {
@@ -77,8 +77,18 @@ public void handleButtonEvents(GButton button, GEvent event) {
         println(fname);
     }
     if (button == p.newPlaylist) {
-        p.playlistSelected = true;
-        
+        if (p.playlistTitle.getText().trim() == "" || p.playlistTitle.getText() == null) {
+            G4P.showMessage(this,"You need to name the playlist.","Null Warning",G4P.WARN_MESSAGE);
+        }
+        else {
+            JSONObject playlist = new JSONObject();
+            JSONArray playlistSongs = new JSONArray();
+            playlist.put("songs",playlistSongs);
+            playlist.put("title",p.playlistTitle.getText().trim());
+            cymatica.getJSONArray("playlists").append(playlist);
+            p.playlistSelected = true;
+            
+        }
     }
     if (button == p.newPlaylistFromDir) {
         String fname = G4P.selectFolder("Select a folder to scan");
@@ -89,7 +99,8 @@ public void handleButtonEvents(GButton button, GEvent event) {
             G4P.showMessage(this,"You need to name the playlist.","Null Warning",G4P.WARN_MESSAGE);
         }
         else{
-            JSONArray playlist = new JSONArray();
+            JSONObject playlist = new JSONObject();
+            JSONArray playlistSongs = new JSONArray();
             p.playlistSelected = true;
             File f = new File(fname);
             File[]matchingFiles = f.listFiles();
@@ -97,6 +108,7 @@ public void handleButtonEvents(GButton button, GEvent event) {
                 if (song.getName().toLowerCase().contains(".mp3") || song.getName().toLowerCase().contains(".wav") || song.getName().toLowerCase().contains(".aif") || song.getName().toLowerCase().contains(".aiff") || song.getName().toLowerCase().contains(".mid")) {
                     String path = sketchPath() + "/Library/Songs/" + song.getName();
                     File localSong = new File(path);
+                    playlistSongs.append(path);
                     if (!localSong.isFile()) {
                         saveBytes(sketchPath() + "/Library/Songs/" + song.getName(),loadBytes(song.getAbsolutePath()));
                         JSONObject s = new JSONObject();
@@ -112,10 +124,14 @@ public void handleButtonEvents(GButton button, GEvent event) {
                         s.put("coronaFFTMax",86);
                         s.put("coronaRepetitions",6);
                         cymatica.getJSONArray("songs").append(s);
-                        saveJSONObject(cymatica,sketchPath() + "/Library/Cymatica.json");
                     }
                 }
             }
+            p.selectedList = p.playlistTitle.getText().trim();
+            playlist.put("title",p.playlistTitle.getText().trim());
+            playlist.put("songs",playlistSongs);
+            cymatica.getJSONArray("playlists").append(playlist);
+            saveJSONObject(cymatica,sketchPath() + "/Library/Cymatica.json");
         }
     }
 }

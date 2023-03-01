@@ -1,5 +1,6 @@
 class Player {
     PApplet p;
+    JSONObject c;
     SampleManager sm;
     SamplePlayer player;
     Glide gl;
@@ -22,11 +23,12 @@ class Player {
     GButton viewLibrary;
     GTextField playlistTitle;
     
-    Player(PApplet applet) {
+    Player(PApplet applet, JSONObject data) {
         ac = AudioContext.getDefaultContext();
         gl = new Glide(ac, 1);
         g = new Gain(2, gl);
         p = applet;
+        c = data;
         newPlaylistFromDir = new GButton(p, width / 2 - 100, height / 2 + 40, 100, 40, "Local Playlist");
         newPlaylist = new GButton(p, width / 2, height / 2 + 40, 100, 40, "Empty Playlist");
         addLocal = new GButton(p, 0, 0, 75, 25, "Add Song");
@@ -43,6 +45,9 @@ class Player {
             playlistTitle.moveTo(width - 200, 0);
             newPlaylistFromDir.moveTo(width - 200, 30);
             newPlaylist.moveTo(width - 100, 30);
+            if (player == null) {
+                c.getJSONArray("playlists");
+            }
         } else {
             newPlaylistFromDir.moveTo(width / 2 - 100, height / 2 + 40);
             newPlaylist.moveTo(width / 2, height / 2 + 40);
@@ -56,20 +61,5 @@ class Player {
             fill(255);
             text("Cymatica", width / 2, height / 2 - 50);
         }
-    }
-    
-    public void addSong() {
-    }
-    
-    public void createPlaylist() {
-    }
-    
-    void fileSelected(File selection) {
-        String audioFileName = selection.getAbsolutePath();
-        SamplePlayer player = new SamplePlayer(SampleManager.sample(audioFileName));
-        player.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
-        g.addInput(player);
-        ac.out.addInput(g);
-        ac.start();
     }
 }
