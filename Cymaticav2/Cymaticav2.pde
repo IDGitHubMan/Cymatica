@@ -101,7 +101,6 @@ public void handleButtonEvents(GButton button, GEvent event) {
         else{
             JSONObject playlist = new JSONObject();
             JSONArray playlistSongs = new JSONArray();
-            p.playlistSelected = true;
             File f = new File(fname);
             File[]matchingFiles = f.listFiles();
             for (File song : matchingFiles) {
@@ -127,11 +126,12 @@ public void handleButtonEvents(GButton button, GEvent event) {
                     }
                 }
             }
-            p.selectedList = p.playlistTitle.getText().trim();
             playlist.put("title",p.playlistTitle.getText().trim());
             playlist.put("songs",playlistSongs);
             cymatica.getJSONArray("playlists").append(playlist);
             saveJSONObject(cymatica,sketchPath() + "/Library/Cymatica.json");
+            p.selectedList = cymatica.getJSONArray("playlists").size() - 1;
+            p.playlistSelected = true;
         }
     }
 }

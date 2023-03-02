@@ -9,7 +9,7 @@ class Player {
     RMS rms;
     FFT fft;
     
-    String selectedList;
+    int selectedList = 0;
     int songNumber = 0;
     int visualMode = 0;
     Boolean playlistSelected = false;
@@ -46,7 +46,14 @@ class Player {
             newPlaylistFromDir.moveTo(width - 200, 30);
             newPlaylist.moveTo(width - 100, 30);
             if (player == null) {
-                c.getJSONArray("playlists");
+                JSONObject list = (JSONObject) c.getJSONArray("playlists").get(selectedList);
+                println(list);
+                println(list.getJSONArray("songs").get(0));
+                player = new SamplePlayer(ac,sm.sample((String) list.getJSONArray("songs").get(0)));
+                player.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
+                g.addInput(player);
+                ac.out.addInput(g);
+                ac.start();
             }
         } else {
             newPlaylistFromDir.moveTo(width / 2 - 100, height / 2 + 40);
