@@ -57,7 +57,8 @@ class Player {
                 songLastChecked = (int)songCSV.lastModified();
                 Table newSong = loadTable("nowPlaying.csv","header");
                 song = loadTable("nowPlaying.csv","header");
-                if(song.getString(songNumber,"Path") != newSong.getString(songNumber,"Path")) {
+                if(!song.getString(songNumber,"Path").equals(newSong.getString(songNumber,"Path"))) {
+                    println(song.getString(songNumber,"Path"),newSong.getString(songNumber,"Path"));
                     ac.out.clearInputConnections();
                     g.clearInputConnections();
                     player = null;
