@@ -90,24 +90,24 @@ void draw() {
     actual.ellipse(width / 4 * 3, height / 9 * 8, map(s.right.level(), 0, 1, 0, height), map(s.right.level(), 0, 1, 0, height));
     
     actual.endDraw();
-    //if (millis()-timeSinceLastB>50) {
-    //timeSinceLastB = millis();
-    //for (int i= 200; i < width/2; i++) {
-    //if (fftm.getBand(i)*(float)Math.log(i+2)/9>=15) {
-    //BezierTrail bez = new BezierTrail(actual);
-    //bts.add(bez);
-    //break;
-//}
-    //  }
-//}
-    //for (int i = 0; i < bts.size();i++) {
-    //if((bts.get(i).counter>height+150)) {
-    //bts.remove(i);
-//  }
-//}
-    //for (BezierTrail b:bts){
-    //b.follow();
-//}
+    if (millis()-timeSinceLastB>50) {
+        timeSinceLastB = millis();
+        for (int i= 200; i < width/2; i++) {
+            if (fftm.getBand(i)*(float)Math.log(i+2)/9>=15) {
+                BezierTrail bez = new BezierTrail(actual);
+                bts.add(bez);
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < bts.size();i++) {
+        if((bts.get(i).counter>height+150)) {
+            bts.remove(i);
+        }
+    }
+    for (BezierTrail b:bts){
+        b.follow();
+    }
     
     if (millis() - timeSinceLastL>375) {
         timeSinceLastL = millis();
