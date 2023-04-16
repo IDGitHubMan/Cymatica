@@ -4,22 +4,23 @@ import ddf.minim.effects.*;
 import ddf.minim.signals.*;
 import ddf.minim.spi.*;
 import ddf.minim.ugens.*;
-
+float rotator = 0.0f;
 FFT fft;
 Minim m;
 AudioPlayer audio;
 void setup() {
     fullScreen(P3D);
     m = new Minim(this);
-    audio = m.loadFile("wane.wav");
+    audio = m.loadFile("https://vgmsite.com/soundtracks/just-shapes-beats-2018/kmfbzstyzc/12.%20Sevcon%20-%20Big%20Giant%20Circles.mp3");
     audio.setGain(0);
-    audio.loop();
+    audio.play();
     fft = new FFT(audio.bufferSize(),audio.sampleRate());
     println(fft.specSize());
     strokeWeight(2);
 }
 
 void draw() {
+    rotator += 0.01;
     fill(0,32,128,50);
     noStroke();
     rect(0,0,width,height);
@@ -34,10 +35,10 @@ void draw() {
     fft.forward(audio.right);
     stroke(255,0,0);
     noFill();
-    for (int i1 = 0; i1 < angleCount; i1 ++) {
+    for(int i1 = 0; i1 < angleCount; i1 ++) {
         float start = i1 * angleAmount;
-        for (int i = 0; i < range; i++) {
-            float angle = map(i,0,range,start,start + angleAmount);
+        for(int i = 0; i < range; i++) {
+            float angle = map(i,0,range,start,start + angleAmount) + rotator;
             float x = cos(angle);
             float y = sin(angle);
             float fftVal = fft.getBand(i) * (float)Math.log(i + 1) / 4;
@@ -47,10 +48,10 @@ void draw() {
     }
     fft.forward(audio.left);
     stroke(0,255,255);
-    for (int i1 = 0; i1 < angleCount; i1 ++) {
+    for(int i1 = 0; i1 < angleCount; i1 ++) {
         float start = i1 * angleAmount;
-        for (int i = 0; i < range; i++) {
-            float angle = map(i,0,range,start,start + angleAmount);
+        for(int i = 0; i < range; i++) {
+            float angle = map(i,0,range,start,start + angleAmount) + rotator;
             float x = cos(angle);
             float y = sin(angle);
             float fftVal = fft.getBand(i) * (float)Math.log(i + 1) / 4;
@@ -60,10 +61,10 @@ void draw() {
     }
     fft.forward(audio.mix);
     stroke(255);
-    for (int i1 = 0; i1 < angleCount; i1 ++) {
+    for(int i1 = 0; i1 < angleCount; i1 ++) {
         float start = i1 * angleAmount;
-        for (int i = 0; i < range; i++) {
-            float angle = map(i,0,range,start,start + angleAmount);
+        for(int i = 0; i < range; i++) {
+            float angle = map(i,0,range,start,start + angleAmount) + rotator;
             float x = cos(angle);
             float y = sin(angle);
             float fftVal = fft.getBand(i) * (float)Math.log(i + 1) / 4;
