@@ -1,5 +1,9 @@
 class Player {
     Table lib;
+    JSONObject settings;
+    BufferedReader reader;
+    String line;
+    String[] ids;
     PApplet p;
     SampleManager sm;
     SamplePlayer player;
@@ -11,7 +15,6 @@ class Player {
     ShortFrameSegmenter sfs;
     int songNumber = 0;
     Bead nextSong;
-    String vizMode = "iris";
     int variety = 0;
     float range = 86;
     float proportion;
@@ -20,14 +23,28 @@ class Player {
     int angleCount;
     int songLastChecked;
     int settingsLastChecked;
+    int libLastChecked;
     File songList = new File(sketchPath() + "/data/queue.txt");
-    File settingsCSV = new File(sketchPath() + "/data/states.json");
+    File settingJSON = new File(sketchPath() + "/data/states.json");
+    File libraryCSV = new File(sketchPath() + "/data/library.csv");
     
     Player(PApplet applet) {
         lib = loadTable("library.csv","header");
-
+        settings = loadJSONObject("states.json");
+        reader = createReader("queue.txt");
+        try {
+            while ((line = reader.readLine()) != null) {
+                String[] pieces = split(line, ",");
+                println(pieces);
+                int x = int(pieces[0]);
+                int y = int(pieces[1]);
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         songLastChecked = (int) songList.lastModified();
-        settingsLastChecked = (int) settingsCSV.lastModified();
+        settingsLastChecked = (int) settingJSON.lastModified();
         p = applet;
         ac = AudioContext.getDefaultContext();
         gl = new Glide(ac, 1);
@@ -56,6 +73,11 @@ class Player {
         else{
             if(songLastChecked < (int) songList.lastModified()) {
                 songLastChecked = (int)songList.lastModified();
+                lib = loadTable("library.csv","header");
+            }
+            if(settingsLastChecked < (int) settingJSON.lastModified()){
+                settingsLastChecked = (int) settingJSON.lastModified();
+                settings = loadJSONObject("states.json");
             }
         }
         if(player != null) {
@@ -77,7 +99,7 @@ class Player {
             }
             float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
             
-            if(vizMode == "basic") {
+            if(settings.getString("Visualizer").equals("basic")) {
                 stroke(lib.getInt(0,"LeftR"),lib.getInt(0,"LeftG"),lib.getInt(0,"LeftB"),lib.getInt(0,"LeftA"));
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
                     float h = map(player.getOutBuffer(0)[i], -1,1,0,height);
@@ -110,7 +132,7 @@ class Player {
                 stroke(lib.getInt(0,"MixR"),lib.getInt(0,"MixG"),lib.getInt(0,"MixB"),lib.getInt(0,"MixA"));
                 ellipse(width / 2,height / 2,map(mRMS,0,1,50,height),map(mRMS,0,1,50,height));
             }
-            else if(vizMode == "iris") {
+            else if(settings.getString("Visualizer").equals("iris")) {
                 float[] features = ps.getFeatures();
                 stroke(lib.getInt(0,"LeftR"),lib.getInt(0,"LeftG"),lib.getInt(0,"LeftB"),lib.getInt(0,"LeftA"));
                 for(int i1 = 0; i1 <= angleCount; i1 ++) {
