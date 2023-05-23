@@ -14,7 +14,10 @@ import shutil
 class MainWindow(QMainWindow):
     def __init__(self):
         here = os.path.dirname(os.path.abspath(__file__))
-        queue = open(os.path.join(here, 'data/queue.txt'), "w")
+        try:
+            queue = open(os.path.join(here, 'data/queue.txt'), "r")
+        except OSError as error:
+            open(os.path.join(here, 'data/queue.txt'), "w")
         try:
             library = open(os.path.join(here, 'data/library.csv'), "r")
         except OSError as error:
