@@ -1,6 +1,7 @@
 class Player {
     Table lib;
     JSONObject settings;
+    PGraphics actual;
     BufferedReader reader;
     String line;
     String[] ids;
@@ -28,6 +29,7 @@ class Player {
     File libraryCSV = new File(sketchPath() + "/data/library.csv");
     
     Player(PApplet applet) {
+        actual = createGraphics(displayWidth,displayHeight,P3D);
         lib = loadTable("library.csv","header");
         settings = loadJSONObject("states.json");
         reader = createReader("queue.txt");
@@ -57,7 +59,7 @@ class Player {
         angleCount = floor((TWO_PI) / angleAmount);
     }
     
-    void run() {
+    void run() {  
         rotator += 0.01;
         if(player == null) {
             player = new SamplePlayer(ac,sm.sample((String) lib.getString(int(ids[songNumber]),"LocalPath")));
@@ -106,9 +108,10 @@ class Player {
                 mSum += ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2) * ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2);   
             }
             float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
-            
+            actual.beginDraw();
+            actual.background(0);
             if(settings.getString("Visualizer").equals("basic")) {
-                stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
                 float ellipseLim = height * settings.getJSONObject("basicSettings").getFloat("ellipseLimit");
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
@@ -116,38 +119,38 @@ class Player {
                     float h2 = map(player.getOutBuffer(0)[i + 1], -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
-                    line(x,h,x2,h2);
+                    actual.line(x,h,x2,h2);
                 }
-                stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
                     float h = map(player.getOutBuffer(1)[i], -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float h2 = map(player.getOutBuffer(1)[i + 1], -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
-                    line(x,h,x2,h2);
+                    actual.line(x,h,x2,h2);
                 }
-                stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
                     float h = map((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2, -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float h2 = map((player.getOutBuffer(0)[i + 1] + player.getOutBuffer(1)[i + 1]) / 2, -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
-                    line(x,h,x2,h2);
+                    actual.line(x,h,x2,h2);
                 }   
-                noFill();
-                stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
-                ellipse(width / 2 - 1,height / 2,map(lRMS,0,1,0,ellipseLim),map(lRMS,0,1,0,ellipseLim));
-                stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
-                ellipse(width / 2 + 1,height / 2,map(rRMS,0,1,0,ellipseLim),map(rRMS,0,1,0,ellipseLim));
-                stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
-                ellipse(width / 2,height / 2,map(mRMS,0,1,0,ellipseLim),map(mRMS,0,1,0,ellipseLim));
+                actual.noFill();
+                actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
+                actual.ellipse(width / 2 - 1,height / 2,map(lRMS,0,1,0,ellipseLim),map(lRMS,0,1,0,ellipseLim));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
+                actual.ellipse(width / 2 + 1,height / 2,map(rRMS,0,1,0,ellipseLim),map(rRMS,0,1,0,ellipseLim));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
+                actual.ellipse(width / 2,height / 2,map(mRMS,0,1,0,ellipseLim),map(mRMS,0,1,0,ellipseLim));
                 if (settings.getJSONObject("basicSettings").getBoolean("extraEllipses")){
 
                 }
             }
             else if(settings.getString("Visualizer").equals("iris")) {
                 float[] features = ps.getFeatures();
-                stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 for(int i1 = 0; i1 <= angleCount; i1 ++) {
                     float start = i1 * angleAmount;
                     if(features != null) {
@@ -156,11 +159,11 @@ class Player {
                             float x = cos(angle);
                             float y = sin(angle);
                             float fftVal = features[i] * (float)Math.log(i + 1);
-                            line(width / 2 + 2 + (fftVal + map(lRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(lRMS,0,1,100,height)) * y,width / 2 + 2 + map(lRMS,0,1,100,height) * x,height / 2 + map(lRMS,0,1,100,height) * y);
+                            actual.line(width / 2 + 2 + (fftVal + map(lRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(lRMS,0,1,100,height)) * y,width / 2 + 2 + map(lRMS,0,1,100,height) * x,height / 2 + map(lRMS,0,1,100,height) * y);
                         }
                     }
                 }
-                stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
                 for(int i1 = 0; i1 <= angleCount; i1 ++) {
                     float start = i1 * angleAmount;
                     if(features != null) {
@@ -169,11 +172,11 @@ class Player {
                             float x = cos(angle);
                             float y = sin(angle);
                             float fftVal = features[i] * (float)Math.log(i + 1);
-                            line(width / 2 - 2 + (fftVal + map(rRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(rRMS,0,1,100,height)) * y,width / 2 + 2 + map(rRMS,0,1,100,height) * x,height / 2 + map(rRMS,0,1,100,height) * y);
+                            actual.line(width / 2 - 2 + (fftVal + map(rRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(rRMS,0,1,100,height)) * y,width / 2 + 2 + map(rRMS,0,1,100,height) * x,height / 2 + map(rRMS,0,1,100,height) * y);
                         }
                     }
                 }
-                stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
+                actual.stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
                 for(int i1 = 0; i1 <= angleCount; i1 ++) {
                     float start = i1 * angleAmount;
                     if(features != null) {
@@ -182,13 +185,15 @@ class Player {
                             float x = cos(angle);
                             float y = sin(angle);
                             float fftVal = features[i] * (float)Math.log(i + 1);
-                            line(width / 2 + (fftVal + map(mRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(mRMS,0,1,100,height)) * y,width / 2 + 2 + map(mRMS,0,1,100,height) * x,height / 2 + map(mRMS,0,1,100,height) * y);
+                            actual.line(width / 2 + (fftVal + map(mRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(mRMS,0,1,100,height)) * y,width / 2 + 2 + map(mRMS,0,1,100,height) * x,height / 2 + map(mRMS,0,1,100,height) * y);
                         }
                     }
                 }
-                fill(0);
-                ellipse(width / 2,height / 2,2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)),2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)));
+                actual.fill(0);
+                actual.ellipse(width / 2,height / 2,2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)),2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)));
             }
         }
-    }
+        actual.endDraw();
+        image(actual,0,0);
+    }  
 }
