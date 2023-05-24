@@ -64,11 +64,12 @@ class Player {
             player.setKillListener(
                 new Bead(){
                     protected void messageReceived(Bead b){
+                        player = null;
+                        sm.removeSample((String) lib.getString(int(ids[songNumber]),"LocalPath"));
                         songNumber += 1;
                         if (songNumber >= ids.length){
                             songNumber = 0; 
                         }
-                        player = null;
                     }
                 }
             );
@@ -108,36 +109,41 @@ class Player {
             
             if(settings.getString("Visualizer").equals("basic")) {
                 stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
+                float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
+                float ellipseLim = height * settings.getJSONObject("basicSettings").getFloat("ellipseLimit");
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
-                    float h = map(player.getOutBuffer(0)[i], -1,1,0,height);
-                    float h2 = map(player.getOutBuffer(0)[i + 1], -1,1,0,height);
+                    float h = map(player.getOutBuffer(0)[i], -1,1,height/2-waveLim/2,height/2+waveLim/2);
+                    float h2 = map(player.getOutBuffer(0)[i + 1], -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
                     line(x,h,x2,h2);
                 }
                 stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
-                    float h = map(player.getOutBuffer(1)[i], -1,1,0,height);
-                    float h2 = map(player.getOutBuffer(1)[i + 1], -1,1,0,height);
+                    float h = map(player.getOutBuffer(1)[i], -1,1,height/2-waveLim/2,height/2+waveLim/2);
+                    float h2 = map(player.getOutBuffer(1)[i + 1], -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
                     line(x,h,x2,h2);
                 }
                 stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
                 for(int i = 0; i < ac.getBufferSize() - 1; i++) {
-                    float h = map((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2, -1,1,0,height);
-                    float h2 = map((player.getOutBuffer(0)[i + 1] + player.getOutBuffer(1)[i + 1]) / 2, -1,1,0,height);
+                    float h = map((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2, -1,1,height/2-waveLim/2,height/2+waveLim/2);
+                    float h2 = map((player.getOutBuffer(0)[i + 1] + player.getOutBuffer(1)[i + 1]) / 2, -1,1,height/2-waveLim/2,height/2+waveLim/2);
                     float x = map(i,0,ac.getBufferSize(),0,width);
                     float x2 = map(i + 1,0,ac.getBufferSize(),0,width);
                     line(x,h,x2,h2);
                 }   
                 noFill();
                 stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
-                ellipse(width / 2 - 1,height / 2,map(lRMS,0,1,50,height),map(lRMS,0,1,50,height));
+                ellipse(width / 2 - 1,height / 2,map(lRMS,0,1,0,ellipseLim),map(lRMS,0,1,0,ellipseLim));
                 stroke(lib.getInt(int(ids[songNumber]),"RightR"),lib.getInt(int(ids[songNumber]),"RightG"),lib.getInt(int(ids[songNumber]),"RightB"),lib.getInt(int(ids[songNumber]),"RightA"));
-                ellipse(width / 2 + 1,height / 2,map(rRMS,0,1,50,height),map(rRMS,0,1,50,height));
+                ellipse(width / 2 + 1,height / 2,map(rRMS,0,1,0,ellipseLim),map(rRMS,0,1,0,ellipseLim));
                 stroke(lib.getInt(int(ids[songNumber]),"MixR"),lib.getInt(int(ids[songNumber]),"MixG"),lib.getInt(int(ids[songNumber]),"MixB"),lib.getInt(int(ids[songNumber]),"MixA"));
-                ellipse(width / 2,height / 2,map(mRMS,0,1,50,height),map(mRMS,0,1,50,height));
+                ellipse(width / 2,height / 2,map(mRMS,0,1,0,ellipseLim),map(mRMS,0,1,0,ellipseLim));
+                if (settings.getJSONObject("basicSettings").getBoolean("extraEllipses")){
+
+                }
             }
             else if(settings.getString("Visualizer").equals("iris")) {
                 float[] features = ps.getFeatures();
