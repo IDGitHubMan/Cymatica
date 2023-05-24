@@ -158,7 +158,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i] * (float)Math.log(i + 1);
+                            float fftVal = features[i]*(float)Math.log(i+5)/3;
                             actual.line(width / 2 + 2 + (fftVal + map(lRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(lRMS,0,1,100,height)) * y,width / 2 + 2 + map(lRMS,0,1,100,height) * x,height / 2 + map(lRMS,0,1,100,height) * y);
                         }
                     }
@@ -171,7 +171,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i] * (float)Math.log(i + 1);
+                            float fftVal = features[i]*(float)Math.log(i+5)/3;
                             actual.line(width / 2 - 2 + (fftVal + map(rRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(rRMS,0,1,100,height)) * y,width / 2 + 2 + map(rRMS,0,1,100,height) * x,height / 2 + map(rRMS,0,1,100,height) * y);
                         }
                     }
@@ -184,7 +184,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i] * (float)Math.log(i + 1);
+                            float fftVal = features[i]*(float)Math.log(i+5)/3;
                             actual.line(width / 2 + (fftVal + map(mRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(mRMS,0,1,100,height)) * y,width / 2 + 2 + map(mRMS,0,1,100,height) * x,height / 2 + map(mRMS,0,1,100,height) * y);
                         }
                     }
