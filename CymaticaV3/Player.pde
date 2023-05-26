@@ -122,7 +122,14 @@ class Player {
             }
             float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
             actual.beginDraw();
-            actual.background(map(mRMS,0,1,0,255));
+            color bg1 = color(settings.getJSONArray("bg1").getInt(0),settings.getJSONArray("bg1").getInt(1),settings.getJSONArray("bg1").getInt(2),settings.getJSONArray("bg1").getInt(3));
+                color bg2 = color(settings.getJSONArray("bg2").getInt(0),settings.getJSONArray("bg2").getInt(1),settings.getJSONArray("bg2").getInt(2),settings.getJSONArray("bg2").getInt(3));
+            if (settings.getBoolean("bgVolLerp")){
+                actual.background(actual.lerpColor(bg1, bg2, mRMS));
+            }
+            else {
+                actual.background(bg2);
+            }
             if(settings.getString("Visualizer").equals("basic")) {
                 actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
