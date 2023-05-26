@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
                 writer = csv.DictWriter(library, fieldnames=fieldnames)
                 writer.writeheader()
         try:
-            states = open(os.path.join(here, 'data/states.csv'), "r")
+            states = open(os.path.join(here, 'data/states.json'), "r")
         except OSError as error:
             with open(os.path.join(here, 'data/states.json'), "w") as states:
                 defaults = {"Visualizer": "basic", "VisualizerSpeciation": 0, "bg1": [0, 0, 0, 255], "bg2": [255, 255, 255, 255], "bgVolLerp": True, "overlay": "none",
