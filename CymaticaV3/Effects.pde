@@ -19,11 +19,11 @@ class BezierTrail {
     p.beginDraw();
     p.noFill();
     p.strokeCap(ROUND);
-    int length = int(map(noise(counter/1000),0,1,50,150));
+    int length = int(map(noise(counter/1000), 0, 1, 50, 150));
     for (int i = 0; i < length; i++) {
-      color l1 = lerpColor(color(255),col,0.5);
-      p.stroke(lerpColor(l1,col,map(i,0,length,0,1)));
-      p.strokeWeight(map(i,0,length,5,1));
+      color l1 = lerpColor(color(255), col, 0.5);
+      p.stroke(lerpColor(l1, col, map(i, 0, length, 0, 1)));
+      p.strokeWeight(map(i, 0, length, 5, 1));
       float t = map(counter-i, 0, height, 0, 1);
       float blend1 = pow(1-t, 3);
       float blend2 = 3*t*pow(1-t, 2);
@@ -61,33 +61,33 @@ class LaserLine {
     p.beginDraw();
     float m = (p1.y-p2.y)/(p1.x-p2.x);
     p.strokeCap(ROUND);
-    p.strokeWeight(constrain(map(timer,0,15,50,0),0,50));
-    p.stroke(255, 0, 128,constrain(map(timer,0,15,255,0),0,255));
+    p.strokeWeight(constrain(map(timer, 0, 15, 50, 0), 0, 50));
+    p.stroke(255, 0, 128, constrain(map(timer, 0, 15, 255, 0), 0, 255));
     p.line(p1.x, p1.y, p2.x, p2.y);
     p.endDraw();
     timer+=1;
   }
 }
 
-class HorizLine{
+class HorizLine {
   float yPos = height;
   float xPos = random(width);
   color col;
-  float speed = random(5,50);
+  float speed = random(5, 50);
   PGraphics p;
-  HorizLine(PGraphics img){
+  HorizLine(PGraphics img) {
     p = img;
     yPos = height;
     xPos = random(width);
     col = color(random(128, 255), random(128), random(128));
   }
-  void drawLine(){
+  void drawLine() {
     p.beginDraw();
-    int length = int(map(speed,5,50,50,150));
+    int length = int(map(speed, 5, 50, 50, 150));
     for (int i = 0; i < length; i++) {
-      color l1 = lerpColor(color(255),col,0.5);
-      p.stroke(lerpColor(l1,col,map(i,0,length,0,1)));
-      p.strokeWeight(map(i,0,length,10,1));
+      color l1 = lerpColor(color(255), col, 0.5);
+      p.stroke(lerpColor(l1, col, map(i, 0, length, 0, 1)));
+      p.strokeWeight(map(i, 0, length, 10, 1));
       p.point(xPos, yPos+i);
     }
     yPos -= speed;
