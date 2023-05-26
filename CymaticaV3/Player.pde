@@ -43,6 +43,7 @@ class Player {
         }
         songLastChecked = (int) songList.lastModified();
         settingsLastChecked = (int) settingJSON.lastModified();
+        libLastChecked = (int) libraryCSV.lastModified();
         p = applet;
         ac = AudioContext.getDefaultContext();
         gl = new Glide(ac, 1);
@@ -61,7 +62,7 @@ class Player {
     
     void run() {  
         rotator += 0.01;
-        if(player == null) {
+        if(player == null && ids.length >= 1) {
             player = new SamplePlayer(ac,sm.sample((String) lib.getString(int(ids[songNumber]),"LocalPath")));
             player.setKillListener(
                 new Bead(){
@@ -83,11 +84,23 @@ class Player {
         else{
             if(songLastChecked < (int) songList.lastModified()) {
                 songLastChecked = (int)songList.lastModified();
-                lib = loadTable("library.csv","header");
+                reader = createReader("queue.txt");
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        ids = split(line, ",");
+                    }
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             if(settingsLastChecked < (int) settingJSON.lastModified()){
                 settingsLastChecked = (int) settingJSON.lastModified();
                 settings = loadJSONObject("states.json");
+            }
+            if (libLastChecked < (int) libraryCSV.lastModified()){
+                libLastChecked = (int) libraryCSV.lastModified();
+                lib = loadTable("library.csv","header");
             }
         }
         if(player != null) {
@@ -109,7 +122,7 @@ class Player {
             }
             float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
             actual.beginDraw();
-            actual.background(0);
+            actual.background(map(mRMS,0,1,0,255));
             if(settings.getString("Visualizer").equals("basic")) {
                 actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
