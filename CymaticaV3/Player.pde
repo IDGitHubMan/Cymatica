@@ -63,12 +63,12 @@ class Player {
     void run() {  
         rotator += 0.01;
         if(player == null && ids.length >= 1) {
-            player = new SamplePlayer(ac,sm.sample((String) lib.getString(int(ids[songNumber]),"LocalPath")));
+            player = new SamplePlayer(ac,sm.sample((String) lib.getString(int(ids[songNumber]),"OrigPath")));
             player.setKillListener(
                 new Bead(){
                     protected void messageReceived(Bead b){
                         player = null;
-                        sm.removeSample((String) lib.getString(int(ids[songNumber]),"LocalPath"));
+                        sm.removeSample((String) lib.getString(int(ids[songNumber]),"OrigPath"));
                         songNumber += 1;
                         if (songNumber >= ids.length){
                             songNumber = 0; 
@@ -210,7 +210,9 @@ class Player {
                     }
                 }
                 actual.fill(0);
-                actual.ellipse(width / 2,height / 2,2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)),2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)));
+                if (!settings.getJSONObject("irisSettings").getBoolean("hollow")){
+                    actual.ellipse(width / 2,height / 2,2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)),2 * min(map(lRMS,0,1,100,height),map(rRMS,0,1,100,height),map(mRMS,0,1,100,height)));
+                }
             }
         }
         actual.endDraw();
