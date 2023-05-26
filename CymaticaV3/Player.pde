@@ -122,15 +122,15 @@ class Player {
             }
             float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
             actual.beginDraw();
-            color bg1 = color(settings.getJSONArray("bg1").getInt(0),settings.getJSONArray("bg1").getInt(1),settings.getJSONArray("bg1").getInt(2),settings.getJSONArray("bg1").getInt(3));
-                color bg2 = color(settings.getJSONArray("bg2").getInt(0),settings.getJSONArray("bg2").getInt(1),settings.getJSONArray("bg2").getInt(2),settings.getJSONArray("bg2").getInt(3));
+            color bg1 = color(lib.getInt(songNumber,"BG1R"),lib.getInt(songNumber,"BG1G"),lib.getInt(songNumber,"BG1B"),lib.getInt(songNumber,"BG1A"));
+            color bg2 = color(lib.getInt(songNumber,"BG2R"),lib.getInt(songNumber,"BG2G"),lib.getInt(songNumber,"BG2B"),lib.getInt(songNumber,"BG2A"));
             if (settings.getBoolean("bgVolLerp")){
                 actual.background(actual.lerpColor(bg1, bg2, mRMS));
             }
             else {
                 actual.background(bg2);
             }
-            if(settings.getString("Visualizer").equals("basic")) {
+            if(settings.getInt("Visualizer") == 0) {
                 actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
                 float ellipseLim = height * settings.getJSONObject("basicSettings").getFloat("ellipseLimit");
@@ -168,7 +168,7 @@ class Player {
 
                 }
             }
-            else if(settings.getString("Visualizer").equals("iris")) {
+            else if(settings.getInt("Visualizer") == 1) {
                 float[] features = ps.getFeatures();
                 actual.stroke(lib.getInt(int(ids[songNumber]),"LeftR"),lib.getInt(int(ids[songNumber]),"LeftG"),lib.getInt(int(ids[songNumber]),"LeftB"),lib.getInt(int(ids[songNumber]),"LeftA"));
                 for(int i1 = 0; i1 <= angleCount; i1 ++) {
@@ -178,7 +178,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i]*(float)Math.log(i+5)/3;
+                            float fftVal = features[i]*i/sqrt(features.length);
                             actual.line(width / 2 + 2 + (fftVal + map(lRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(lRMS,0,1,100,height)) * y,width / 2 + 2 + map(lRMS,0,1,100,height) * x,height / 2 + map(lRMS,0,1,100,height) * y);
                         }
                     }
@@ -191,7 +191,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i]*(float)Math.log(i+5)/3;
+                            float fftVal = features[i]*i/sqrt(features.length);
                             actual.line(width / 2 - 2 + (fftVal + map(rRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(rRMS,0,1,100,height)) * y,width / 2 + 2 + map(rRMS,0,1,100,height) * x,height / 2 + map(rRMS,0,1,100,height) * y);
                         }
                     }
@@ -204,7 +204,7 @@ class Player {
                             float angle = map(i,0,range,start,start + angleAmount) + rotator;
                             float x = cos(angle);
                             float y = sin(angle);
-                            float fftVal = features[i]*(float)Math.log(i+5)/3;
+                            float fftVal = features[i]*i/sqrt(features.length);
                             actual.line(width / 2 + (fftVal + map(mRMS,0,1,100,height)) * x,height / 2 + (fftVal + map(mRMS,0,1,100,height)) * y,width / 2 + 2 + map(mRMS,0,1,100,height) * x,height / 2 + map(mRMS,0,1,100,height) * y);
                         }
                     }
