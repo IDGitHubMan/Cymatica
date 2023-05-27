@@ -20,6 +20,7 @@ class Player {
   float proportion;
   float angleAmount;
   float rotator = 0.0;
+  float mRMS, lRMS, rRMS;
   int angleCount;
   int songLastChecked;
   int settingsLastChecked;
@@ -111,19 +112,19 @@ class Player {
       for (int i = 0; i < ac.getBufferSize() - 1; i++) {
         lSum += player.getOutBuffer(0)[i] * player.getOutBuffer(0)[i];
       }
-      float lRMS = (float) Math.sqrt(lSum / ac.getBufferSize());
+      lRMS = (float) Math.sqrt(lSum / ac.getBufferSize());
 
       float rSum = 0;
       for (int i = 0; i < ac.getBufferSize() - 1; i++) {
         rSum += player.getOutBuffer(1)[i] * player.getOutBuffer(1)[i];
       }
-      float rRMS = (float) Math.sqrt(rSum / ac.getBufferSize());
+      rRMS = (float) Math.sqrt(rSum / ac.getBufferSize());
 
       float mSum = 0;
       for (int i = 0; i < ac.getBufferSize() - 1; i++) {
         mSum += ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2) * ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2);
       }
-      float mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
+      mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
       actual.beginDraw();
       color bg1 = color(lib.getInt(songNumber, "BG1R"), lib.getInt(songNumber, "BG1G"), lib.getInt(songNumber, "BG1B"), lib.getInt(songNumber, "BG1A"));
       color bg2 = color(lib.getInt(songNumber, "BG2R"), lib.getInt(songNumber, "BG2G"), lib.getInt(songNumber, "BG2B"), lib.getInt(songNumber, "BG2A"));
@@ -184,13 +185,12 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
-                    actual.strokeWeight(1);
-                    actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(lRMS, 0, 1, 1, height) * x, height / 2 + map(lRMS, 0, 1, 1, height) * y);
-                }
-                else{
-                    actual.strokeWeight(3);
-                    actual.point(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1) {
+                  actual.strokeWeight(1);
+                  actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(lRMS, 0, 1, 1, height) * x, height / 2 + map(lRMS, 0, 1, 1, height) * y);
+                } else {
+                  actual.strokeWeight(3);
+                  actual.point(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
                 }
               }
             }
@@ -227,13 +227,12 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
-                    actual.strokeWeight(1);
-                    actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2 + map(rRMS, 0, 1, 1, height) * y);
-                }
-                else{
-                    actual.strokeWeight(3);
-                    actual.point(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1) {
+                  actual.strokeWeight(1);
+                  actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2 + map(rRMS, 0, 1, 1, height) * y);
+                } else {
+                  actual.strokeWeight(3);
+                  actual.point(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
                 }
               }
             }
@@ -270,13 +269,12 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
-                    actual.strokeWeight(1);
-                    actual.line(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(mRMS, 0, 1, 1, height) * x, height / 2 + map(mRMS, 0, 1, 1, height) * y);
-                }
-                else{
-                    actual.strokeWeight(3);
-                    actual.point(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1) {
+                  actual.strokeWeight(1);
+                  actual.line(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(mRMS, 0, 1, 1, height) * x, height / 2 + map(mRMS, 0, 1, 1, height) * y);
+                } else {
+                  actual.strokeWeight(3);
+                  actual.point(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y);
                 }
               }
             }
@@ -312,6 +310,27 @@ class Player {
       }
     }
     actual.endDraw();
+    actual.updatePixels();
     image(actual, 0, 0);
+    float reach = map(mRMS, 0, 1, 1, 1000);
+    float weight = map(mRMS, 0, 1, 1, 10);
+    actual.loadPixels();
+    for (int ix = 0; ix < width; ix += 5) {
+      for (int iy = 0; iy < height; iy += 5) {
+        stroke(color(actual.pixels[ix + (iy*actual.width)]));
+        strokeWeight(weight);
+        if (settings.getInt("overlay") == 1) {
+          line(ix-random(-reach, reach), iy-random(-reach, reach), ix+random(-reach, reach), iy+random(-reach, reach));
+        } else if (settings.getInt("overlay") == 2) {
+          line(ix, iy, ix+random(-reach, reach), iy);
+          line(ix, iy, ix, iy+random(-reach, reach));
+        } else if (settings.getInt("overlay") == 3) {
+          line(ix-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), ix+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach));
+        } else if (settings.getInt("overlay") == 4) {
+          line(ix, iy - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), ix, iy + map(noise(ix, iy, (float)millis() / 1000), 0, 1, 0, reach));
+          line(ix - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy, ix + map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy);
+        }
+      }
+    }
   }
 }
