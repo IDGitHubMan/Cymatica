@@ -184,7 +184,14 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(lRMS, 0, 1, 1, height) * x, height / 2 + map(lRMS, 0, 1, 1, height) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
+                    actual.strokeWeight(1);
+                    actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(lRMS, 0, 1, 1, height) * x, height / 2 + map(lRMS, 0, 1, 1, height) * y);
+                }
+                else{
+                    actual.strokeWeight(3);
+                    actual.point(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
+                }
               }
             }
           }
@@ -194,6 +201,7 @@ class Player {
           } else {
             actual.fill(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
           }
+          actual.strokeWeight(1);
           actual.beginShape();
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
@@ -219,7 +227,14 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2 + map(rRMS, 0, 1, 1, height) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
+                    actual.strokeWeight(1);
+                    actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2 + map(rRMS, 0, 1, 1, height) * y);
+                }
+                else{
+                    actual.strokeWeight(3);
+                    actual.point(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
+                }
               }
             }
           }
@@ -229,6 +244,7 @@ class Player {
           } else {
             actual.fill(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
           }
+          actual.strokeWeight(1);
           actual.beginShape();
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
@@ -254,7 +270,14 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                actual.line(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(mRMS, 0, 1, 1, height) * x, height / 2 + map(mRMS, 0, 1, 1, height) * y);
+                if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1){
+                    actual.strokeWeight(1);
+                    actual.line(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(mRMS, 0, 1, 1, height) * x, height / 2 + map(mRMS, 0, 1, 1, height) * y);
+                }
+                else{
+                    actual.strokeWeight(3);
+                    actual.point(width / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(mRMS, 0, 1, 1, height)) * y);
+                }
               }
             }
           }
@@ -270,6 +293,7 @@ class Player {
           } else {
             actual.fill(lib.getInt(int(ids[songNumber]), "MixR"), lib.getInt(int(ids[songNumber]), "MixG"), lib.getInt(int(ids[songNumber]), "MixB"), lib.getInt(int(ids[songNumber]), "MixA"));
           }
+          actual.strokeWeight(1);
           actual.beginShape();
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
