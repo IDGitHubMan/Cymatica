@@ -7,6 +7,7 @@ import csv
 from PyQt6.QtCore import QSize, pyqtSlot
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
 import shutil
+import random
 
 # Subclass QMainWindow to customize your application's main window
 
@@ -30,8 +31,8 @@ class MainWindow(QMainWindow):
             states = open(os.path.join(here, 'data/states.json'), "r")
         except OSError as error:
             with open(os.path.join(here, 'data/states.json'), "w") as states:
-                defaults = {"Visualizer": "basic", "VisualizerSpeciation": 0, "bgVolLerp": True, "overlay": "none",
-                            "playing": False, "loop": 0, "volume": 1, "diffChannels": True, "basicSettings": {"extraEllipses": False, "waveformLimit": 0.5, "ellipseLimit": 0.3}, "irisSettings": {"rotation": True, "lowerBound": 0, "upperBound": 86, "hollow": True, "shapeType": "line"}}
+                defaults = {"Visualizer": 0, "VisualizerSpeciation": 0, "bgVolLerp": True, "overlay": 0, "overlaySpace": 10,
+                            "playing": False, "loop": 0, "volume": 1, "diffChannels": True, "basicSettings": {"extraEllipses": False, "waveformLimit": 0.5, "ellipseLimit": 0.3}, "irisSettings": {"rotation": True, "lowerBound": 0, "upperBound": 86, "hollow": True, "shapeType": 0}}
                 ob = json.dumps(defaults)
                 states.write(ob)
         try:
@@ -65,13 +66,19 @@ class MainWindow(QMainWindow):
         if a.tag.title != "" or a.tag.title != " ":
             with open(os.path.join(here, 'data/library.csv'), "a") as library:
                 writer = csv.writer(library, delimiter=',', quotechar='"')
+                r = random.randint(0, 255)
+                g = random.randint(0, 255)
+                b = random.randint(0, 255)
                 writer.writerow([a.tag.title, fname[0], os.path.join(
-                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", 0, 255, 255, 255, 255, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 0, 255, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
+                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
         else:
             with open(os.path.join(here, 'data/library.csv'), "a") as library:
                 writer = csv.writer(library, delimiter=',', quotechar='"')
+                r = random.randint(0, 255)
+                g = random.randint(0, 255)
+                b = random.randint(0, 255)
                 writer.writerow([fname[0][fname[0].rindex("/"): -4], fname[0], os.path.join(
-                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", 0, 255, 255, 255, 255, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 0, 255, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
+                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
 
 
 app = QApplication(sys.argv)
