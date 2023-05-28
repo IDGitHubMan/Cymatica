@@ -28,6 +28,7 @@ class Player {
   File songList = new File(sketchPath() + "/data/queue.txt");
   File settingJSON = new File(sketchPath() + "/data/states.json");
   File libraryCSV = new File(sketchPath() + "/data/library.csv");
+  color bg1, bg2;
 
   Player(PApplet applet) {
     actual = createGraphics(displayWidth, displayHeight, P3D);
@@ -126,8 +127,8 @@ class Player {
       }
       mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
       actual.beginDraw();
-      color bg1 = color(lib.getInt(songNumber, "BG1R"), lib.getInt(songNumber, "BG1G"), lib.getInt(songNumber, "BG1B"), lib.getInt(songNumber, "BG1A"));
-      color bg2 = color(lib.getInt(songNumber, "BG2R"), lib.getInt(songNumber, "BG2G"), lib.getInt(songNumber, "BG2B"), lib.getInt(songNumber, "BG2A"));
+      bg1 = color(lib.getInt(songNumber, "BG1R"), lib.getInt(songNumber, "BG1G"), lib.getInt(songNumber, "BG1B"), lib.getInt(songNumber, "BG1A"));
+      bg2 = color(lib.getInt(songNumber, "BG2R"), lib.getInt(songNumber, "BG2G"), lib.getInt(songNumber, "BG2B"), lib.getInt(songNumber, "BG2A"));
       if (settings.getBoolean("bgVolLerp")) {
         actual.noStroke();
         actual.fill(actual.lerpColor(bg1, bg2, mRMS));
@@ -312,23 +313,102 @@ class Player {
     actual.endDraw();
     actual.updatePixels();
     image(actual, 0, 0);
-    float reach = map(mRMS, 0, 1, 1, 1000);
+    float reach = map(mRMS, 0, 1, 1, 100);
     float weight = map(mRMS, 0, 1, 1, 10);
+    int space = settings.getInt("overlaySpace");
     actual.loadPixels();
-    for (int ix = 0; ix < width; ix += 5) {
-      for (int iy = 0; iy < height; iy += 5) {
-        stroke(color(actual.pixels[ix + (iy*actual.width)]));
-        strokeWeight(weight);
-        if (settings.getInt("overlay") == 1) {
-          line(ix-random(-reach, reach), iy-random(-reach, reach), ix+random(-reach, reach), iy+random(-reach, reach));
-        } else if (settings.getInt("overlay") == 2) {
-          line(ix, iy, ix+random(-reach, reach), iy);
-          line(ix, iy, ix, iy+random(-reach, reach));
-        } else if (settings.getInt("overlay") == 3) {
-          line(ix-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), ix+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach));
-        } else if (settings.getInt("overlay") == 4) {
-          line(ix, iy - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), ix, iy + map(noise(ix, iy, (float)millis() / 1000), 0, 1, 0, reach));
-          line(ix - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy, ix + map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy);
+    for (int ix = 0; ix < width; ix += space) {
+      for (int iy = 0; iy < height; iy += space) {
+        if (settings.getBoolean("bgVolLerp")) {
+          if (red(actual.pixels[ix + (iy*actual.width)]) - red(actual.lerpColor(bg1, bg2, mRMS)) <= 10 && green(actual.pixels[ix + (iy*actual.width)]) - green(actual.lerpColor(bg1, bg2, mRMS)) <= 10 && blue(actual.pixels[ix + (iy*actual.width)]) - blue(actual.lerpColor(bg1, bg2, mRMS)) <= 10) {
+          } else {
+            stroke(color(actual.pixels[ix + (iy*actual.width)]));
+            strokeWeight(weight);
+            if (settings.getInt("overlay") == 1) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-random(-reach, reach), iy-random(-reach, reach), ix+random(-reach, reach), iy+random(-reach, reach));
+            } else if (settings.getInt("overlay") == 2) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy, ix+random(-reach, reach), iy);
+              line(ix, iy, ix, iy+random(-reach, reach));
+            } else if (settings.getInt("overlay") == 3) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), ix+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach));
+            } else if (settings.getInt("overlay") == 4) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), ix, iy + map(noise(ix, iy, (float)millis() / 1000), 0, 1, 0, reach));
+              line(ix - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy, ix + map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy);
+            } else if (settings.getInt("overlay") == 5) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy, ix+reach, iy+reach);
+            } else if (settings.getInt("overlay") == 6) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-reach, iy-reach, ix, iy);
+            } else if (settings.getInt("overlay") == 8) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              ellipse(ix, iy, random(-reach, reach), random(-reach, reach));
+            } else if (settings.getInt("overlay") == 7) {
+              reach = map(mRMS, 0, 1, 1, 500);
+              strokeWeight(map(mRMS, 0, 1, 1, 20));
+              point(ix + random(-reach, reach), iy + random(-reach, reach));
+            } else if (settings.getInt("overlay") == 9) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              rect(ix-reach/2, iy-reach/2, reach, reach);
+            } else if (settings.getInt("overlay") == 10) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              float w = random(reach);
+              float h = random(reach);
+              rect(ix-w/2, iy-h/2, w, h);
+            }
+          }
+        } else {
+          if (red(actual.pixels[ix + (iy*actual.width)]) - red(actual.lerpColor(bg1, bg2, 0.5)) <= 10 && green(actual.pixels[ix + (iy*actual.width)]) - green(actual.lerpColor(bg1, bg2, 0.5)) <= 10 && blue(actual.pixels[ix + (iy*actual.width)]) - blue(actual.lerpColor(bg1, bg2, 0.5)) <= 10) {
+          } else {
+            stroke(color(actual.pixels[ix + (iy*actual.width)]));
+            strokeWeight(weight);
+            if (settings.getInt("overlay") == 1) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-random(-reach, reach), iy-random(-reach, reach), ix+random(-reach, reach), iy+random(-reach, reach));
+            } else if (settings.getInt("overlay") == 2) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy, ix+random(-reach, reach), iy);
+              line(ix, iy, ix, iy+random(-reach, reach));
+            } else if (settings.getInt("overlay") == 3) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy-map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), ix+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach), iy+map(noise(ix, iy, (float)millis()/1000), 0, 1, -reach, reach));
+            } else if (settings.getInt("overlay") == 4) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), ix, iy + map(noise(ix, iy, (float)millis() / 1000), 0, 1, 0, reach));
+              line(ix - map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy, ix + map(noise(ix, iy, ix + (float)millis() / 1000), 0, 1, 0, reach), iy);
+            } else if (settings.getInt("overlay") == 5) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix, iy, ix+reach, iy+reach);
+            } else if (settings.getInt("overlay") == 6) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              line(ix-reach, iy-reach, ix, iy);
+            } else if (settings.getInt("overlay") == 8) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              ellipse(ix, iy, random(-reach, reach), random(-reach, reach));
+            } else if (settings.getInt("overlay") == 7) {
+              reach = map(mRMS, 0, 1, 1, 500);
+              strokeWeight(map(mRMS, 0, 1, 1, 20));
+              point(ix + random(-reach, reach), iy + random(-reach, reach));
+            } else if (settings.getInt("overlay") == 9) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              rect(ix-reach/2, iy-reach/2, reach, reach);
+            } else if (settings.getInt("overlay") == 10) {
+              reach = map(mRMS, 0, 1, 1, 100);
+              noFill();
+              float w = random(reach);
+              float h = random(reach);
+              rect(ix-w/2, iy-h/2, w, h);
+            }
+          }
         }
       }
     }
