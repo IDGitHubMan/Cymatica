@@ -5,7 +5,6 @@ class Player {
   BufferedReader reader;
   String line;
   String[] ids;
-  PApplet p;
   SampleManager sm;
   SamplePlayer player;
   PowerSpectrum ps;
@@ -16,12 +15,9 @@ class Player {
   ShortFrameSegmenter sfs;
   int songNumber = 0;
   int variety = 0;
-  float range = 86;
-  float proportion;
-  float angleAmount;
+  int upperBound, lowerBound;
   float rotator = 0.0;
   float mRMS, lRMS, rRMS;
-  int angleCount;
   int songLastChecked;
   int settingsLastChecked;
   int libLastChecked;
@@ -30,7 +26,7 @@ class Player {
   File libraryCSV = new File(sketchPath() + "/data/library.csv");
   color bg1, bg2;
 
-  Player(PApplet applet) {
+  Player() {
     actual = createGraphics(displayWidth, displayHeight, P3D);
     lib = loadTable("library.csv", "header");
     settings = loadJSONObject("states.json");
@@ -47,7 +43,6 @@ class Player {
     songLastChecked = (int) songList.lastModified();
     settingsLastChecked = (int) settingJSON.lastModified();
     libLastChecked = (int) libraryCSV.lastModified();
-    p = applet;
     ac = AudioContext.getDefaultContext();
     gl = new Glide(ac, 1);
     g = new Gain(2, gl);
@@ -59,12 +54,10 @@ class Player {
     fft.addListener(ps);
     ac.out.addDependent(sfs);
     ac.out.addInput(g);
-    proportion = range / ac.getBufferSize();
-    angleAmount = proportion * TWO_PI;
-    angleCount = floor((TWO_PI) / angleAmount);
   }
 
   void run() {
+    float size = ac.getBufferSize();
     if (settings.getJSONObject("irisSettings").getBoolean("rotation")) {
       rotator += 0.01;
     }
@@ -91,7 +84,11 @@ class Player {
         reader = createReader("queue.txt");
         try {
           while ((line = reader.readLine()) != null) {
-            ids = split(line, ",");
+            String[] newIDs = split(line, ",");
+            if (!ids[songNumber].equals(newIDs[songNumber])) {
+              player = null;
+            }
+            ids = newIDs;
           }
           reader.close();
         }
@@ -110,25 +107,25 @@ class Player {
     }
     if (player != null) {
       float lSum = 0;
-      for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+      for (int i = 0; i < size - 1; i++) {
         lSum += player.getOutBuffer(0)[i] * player.getOutBuffer(0)[i];
       }
-      lRMS = (float) Math.sqrt(lSum / ac.getBufferSize());
+      lRMS = (float) Math.sqrt(lSum / size);
 
       float rSum = 0;
-      for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+      for (int i = 0; i < size - 1; i++) {
         rSum += player.getOutBuffer(1)[i] * player.getOutBuffer(1)[i];
       }
-      rRMS = (float) Math.sqrt(rSum / ac.getBufferSize());
+      rRMS = (float) Math.sqrt(rSum / size);
 
       float mSum = 0;
-      for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+      for (int i = 0; i < size - 1; i++) {
         mSum += ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2) * ((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2);
       }
-      mRMS = (float) Math.sqrt(mSum / ac.getBufferSize());
+      mRMS = (float) Math.sqrt(mSum / size);
       actual.beginDraw();
-      bg1 = color(lib.getInt(songNumber, "BG1R"), lib.getInt(songNumber, "BG1G"), lib.getInt(songNumber, "BG1B"), lib.getInt(songNumber, "BG1A"));
-      bg2 = color(lib.getInt(songNumber, "BG2R"), lib.getInt(songNumber, "BG2G"), lib.getInt(songNumber, "BG2B"), lib.getInt(songNumber, "BG2A"));
+      bg1 = color(lib.getInt(Integer.parseInt(ids[songNumber]), "BG1R"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1G"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1B"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1A"));
+      bg2 = color(lib.getInt(Integer.parseInt(ids[songNumber]), "BG2R"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2G"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2B"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2A"));
       if (settings.getBoolean("bgVolLerp")) {
         actual.noStroke();
         actual.fill(actual.lerpColor(bg1, bg2, mRMS));
@@ -142,27 +139,27 @@ class Player {
         actual.stroke(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
         float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
         float ellipseLim = height * settings.getJSONObject("basicSettings").getFloat("ellipseLimit");
-        for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+        for (int i = 0; i < size - 1; i++) {
           float h = map(player.getOutBuffer(0)[i], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
           float h2 = map(player.getOutBuffer(0)[i + 1], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
-          float x = map(i, 0, ac.getBufferSize(), 0, width);
-          float x2 = map(i + 1, 0, ac.getBufferSize(), 0, width);
+          float x = map(i, 0, size, 0, width);
+          float x2 = map(i + 1, 0, size, 0, width);
           actual.line(x, h, x2, h2);
         }
         actual.stroke(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
-        for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+        for (int i = 0; i < size - 1; i++) {
           float h = map(player.getOutBuffer(1)[i], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
           float h2 = map(player.getOutBuffer(1)[i + 1], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
-          float x = map(i, 0, ac.getBufferSize(), 0, width);
-          float x2 = map(i + 1, 0, ac.getBufferSize(), 0, width);
+          float x = map(i, 0, size, 0, width);
+          float x2 = map(i + 1, 0, size, 0, width);
           actual.line(x, h, x2, h2);
         }
         actual.stroke(lib.getInt(int(ids[songNumber]), "MixR"), lib.getInt(int(ids[songNumber]), "MixG"), lib.getInt(int(ids[songNumber]), "MixB"), lib.getInt(int(ids[songNumber]), "MixA"));
-        for (int i = 0; i < ac.getBufferSize() - 1; i++) {
+        for (int i = 0; i < size - 1; i++) {
           float h = map((player.getOutBuffer(0)[i] + player.getOutBuffer(1)[i]) / 2, -1, 1, height/2-waveLim/2, height/2+waveLim/2);
           float h2 = map((player.getOutBuffer(0)[i + 1] + player.getOutBuffer(1)[i + 1]) / 2, -1, 1, height/2-waveLim/2, height/2+waveLim/2);
-          float x = map(i, 0, ac.getBufferSize(), 0, width);
-          float x2 = map(i + 1, 0, ac.getBufferSize(), 0, width);
+          float x = map(i, 0, size, 0, width);
+          float x2 = map(i + 1, 0, size, 0, width);
           actual.line(x, h, x2, h2);
         }
         actual.noFill();
@@ -175,14 +172,19 @@ class Player {
         if (settings.getJSONObject("basicSettings").getBoolean("extraEllipses")) {
         }
       } else if (settings.getInt("Visualizer") == 1) {
+        lowerBound = settings.getJSONObject("irisSettings").getInt("lowerBound");
+        upperBound = settings.getJSONObject("irisSettings").getInt("upperBound");
+        float proportion = (upperBound - lowerBound)/size;
+        float angleAmount = proportion * TWO_PI;
+        int angleCount = floor(TWO_PI/angleAmount);
         float[] features = ps.getFeatures();
         actual.stroke(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
         if (settings.getJSONObject("irisSettings").getInt("shapeType") != 2) {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start + angleAmount) + rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start + angleAmount) + rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
@@ -207,8 +209,8 @@ class Player {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start+angleAmount)+rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start+angleAmount)+rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
@@ -223,8 +225,8 @@ class Player {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start + angleAmount) + rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start + angleAmount) + rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
@@ -249,8 +251,8 @@ class Player {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start+angleAmount)+rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start+angleAmount)+rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
@@ -265,8 +267,8 @@ class Player {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start + angleAmount) + rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start + angleAmount) + rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
@@ -297,8 +299,8 @@ class Player {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
             if (features != null) {
-              for (int i = 0; i < range; i++) {
-                float angle = map(i, 0, range, start, start+angleAmount)+rotator;
+              for (int i = lowerBound; i < upperBound; i++) {
+                float angle = map(i, lowerBound, upperBound, start, start+angleAmount)+rotator;
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
