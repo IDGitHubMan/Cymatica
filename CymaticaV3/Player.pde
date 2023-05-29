@@ -30,7 +30,7 @@ class Player {
   File songList = new File(sketchPath() + "/data/queue.txt");
   File settingJSON = new File(sketchPath() + "/data/states.json");
   File libraryCSV = new File(sketchPath() + "/data/library.csv");
-  color bg1, bg2;
+  color bg1, bg2, c1, c2;
 
   Player() {
     actual = createGraphics(displayWidth, displayHeight, P3D);
@@ -131,8 +131,10 @@ class Player {
       }
       mRMS = (float) Math.sqrt(mSum / size);
       actual.beginDraw();
-      bg1 = color(lib.getInt(Integer.parseInt(ids[songNumber]), "BG1R"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1G"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1B"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG1A"));
-      bg2 = color(lib.getInt(Integer.parseInt(ids[songNumber]), "BG2R"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2G"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2B"), lib.getInt(Integer.parseInt(ids[songNumber]), "BG2A"));
+      bg1 = color(lib.getInt(int(ids[songNumber]), "BG1R"), lib.getInt(int(ids[songNumber]), "BG1G"), lib.getInt(int(ids[songNumber]), "BG1B"), lib.getInt(int(ids[songNumber]), "BG1A"));
+      bg2 = color(lib.getInt(int(ids[songNumber]), "BG2R"), lib.getInt(int(ids[songNumber]), "BG2G"), lib.getInt(int(ids[songNumber]), "BG2B"), lib.getInt(int(ids[songNumber]), "BG2A"));
+      c2 = color(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
+      c1 = color(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
       if (settings.getBoolean("bgVolLerp")) {
         actual.noStroke();
         actual.fill(actual.lerpColor(bg1, bg2, mRMS));
@@ -143,7 +145,7 @@ class Player {
         actual.rect(0, 0, width, height);
       }
       if (settings.getInt("Visualizer") == 0) {
-        actual.stroke(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
+        actual.stroke(c1);
         float waveLim = height * settings.getJSONObject("basicSettings").getFloat("waveformLimit");
         float ellipseLim = height * settings.getJSONObject("basicSettings").getFloat("ellipseLimit");
         for (int i = 0; i < size - 1; i++) {
@@ -153,7 +155,7 @@ class Player {
           float x2 = map(i + 1, 0, size, 0, width);
           actual.line(x, h, x2, h2);
         }
-        actual.stroke(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
+        actual.stroke(c2);
         for (int i = 0; i < size - 1; i++) {
           float h = map(player.getOutBuffer(1)[i], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
           float h2 = map(player.getOutBuffer(1)[i + 1], -1, 1, height/2-waveLim/2, height/2+waveLim/2);
@@ -170,9 +172,9 @@ class Player {
           actual.line(x, h, x2, h2);
         }
         actual.noFill();
-        actual.stroke(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
+        actual.stroke(c1);
         actual.ellipse(width / 2 - 1, height / 2, map(lRMS, 0, 1, 0, ellipseLim), map(lRMS, 0, 1, 0, ellipseLim));
-        actual.stroke(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
+        actual.stroke(c2);
         actual.ellipse(width / 2 + 1, height / 2, map(rRMS, 0, 1, 0, ellipseLim), map(rRMS, 0, 1, 0, ellipseLim));
         actual.stroke(lib.getInt(int(ids[songNumber]), "MixR"), lib.getInt(int(ids[songNumber]), "MixG"), lib.getInt(int(ids[songNumber]), "MixB"), lib.getInt(int(ids[songNumber]), "MixA"));
         actual.ellipse(width / 2, height / 2, map(mRMS, 0, 1, 0, ellipseLim), map(mRMS, 0, 1, 0, ellipseLim));
@@ -184,7 +186,7 @@ class Player {
         float proportion = (upperBound - lowerBound)/size;
         float angleAmount = proportion * TWO_PI;
         int angleCount = floor(TWO_PI/angleAmount);
-        actual.stroke(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
+        actual.stroke(c1);
         if (settings.getJSONObject("irisSettings").getInt("shapeType") != 2) {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
@@ -208,7 +210,7 @@ class Player {
           if (settings.getJSONObject("irisSettings").getBoolean("hollow")) {
             actual.noFill();
           } else {
-            actual.fill(lib.getInt(int(ids[songNumber]), "LeftR"), lib.getInt(int(ids[songNumber]), "LeftG"), lib.getInt(int(ids[songNumber]), "LeftB"), lib.getInt(int(ids[songNumber]), "LeftA"));
+            actual.fill(c1);
           }
           actual.strokeWeight(1);
           actual.beginShape();
@@ -226,7 +228,7 @@ class Player {
           }
           actual.endShape();
         }
-        actual.stroke(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
+        actual.stroke(c2);
         if (settings.getJSONObject("irisSettings").getInt("shapeType") != 2) {
           for (int i1 = 0; i1 <= angleCount; i1 ++) {
             float start = i1 * angleAmount;
@@ -250,7 +252,7 @@ class Player {
           if (settings.getJSONObject("irisSettings").getBoolean("hollow")) {
             actual.noFill();
           } else {
-            actual.fill(lib.getInt(int(ids[songNumber]), "RightR"), lib.getInt(int(ids[songNumber]), "RightG"), lib.getInt(int(ids[songNumber]), "RightB"), lib.getInt(int(ids[songNumber]), "RightA"));
+            actual.fill(c2);
           }
           actual.strokeWeight(1);
           actual.beginShape();
@@ -324,15 +326,15 @@ class Player {
     float reach = map(mRMS, 0, 1, 1, 100);
     float weight = map(mRMS, 0, 1, 1, 10);
     int space = settings.getInt("overlaySpace");
-    if (millis()-timeSinceLastB>50 && lib.getInt(Integer.parseInt(ids[songNumber]),"Spark") == 1) {
+    if (millis()-timeSinceLastB>50 && lib.getInt(int(ids[songNumber]),"Spark") == 1) {
       timeSinceLastB = millis();
       int count = 0;
-      for (int i = lib.getInt(Integer.parseInt(ids[songNumber]),"SparkMin"); i < lib.getInt(Integer.parseInt(ids[songNumber]),"SparkMax"); i++) {
+      for (int i = lib.getInt(int(ids[songNumber]),"SparkMin"); i < lib.getInt(int(ids[songNumber]),"SparkMax"); i++) {
         if (count >= 10 || bts.size() >= 30) {
           break;
         }
-        if (features!=null && features[i]*i/sqrt(features.length)>=lib.getInt(Integer.parseInt(ids[songNumber]),"SparkThreshold")) {
-          BezierTrail bez = new BezierTrail(actual);
+        if (features!=null && features[i]*i/sqrt(features.length)>=lib.getInt(int(ids[songNumber]),"SparkThreshold")) {
+          BezierTrail bez = new BezierTrail(c1,c2);
           bts.add(bez);
           count ++;
           break;
@@ -348,14 +350,14 @@ class Player {
       b.follow();
     }
 
-    if (millis() - timeSinceLastL>375 && lib.getInt(Integer.parseInt(ids[songNumber]),"Laser") == 1) {
+    if (millis() - timeSinceLastL>375 && lib.getInt(int(ids[songNumber]),"Laser") == 1) {
       timeSinceLastL = millis();
       int count = 0;
-      for (int i = lib.getInt(Integer.parseInt(ids[songNumber]),"LaserMin"); i < lib.getInt(Integer.parseInt(ids[songNumber]),"LaserMax"); i++) {
+      for (int i = lib.getInt(int(ids[songNumber]),"LaserMin"); i < lib.getInt(int(ids[songNumber]),"LaserMax"); i++) {
         if (count >= 5) {
           break;
         }
-        if (features!=null && features[i]*i/sqrt(features.length)>lib.getInt(Integer.parseInt(ids[songNumber]),"LaserThreshold")) {
+        if (features!=null && features[i]*i/sqrt(features.length)>lib.getInt(int(ids[songNumber]),"LaserThreshold")) {
           LaserLine l = new LaserLine(actual);
           las.add(l);
           count ++;
@@ -373,15 +375,15 @@ class Player {
       laser.beam();
     }
 
-    if (millis()-timeSinceLastH>50 && lib.getInt(Integer.parseInt(ids[songNumber]),"Line") == 1) {
+    if (millis()-timeSinceLastH>50 && lib.getInt(int(ids[songNumber]),"Line") == 1) {
       timeSinceLastH = millis();
       int count = 0;
-      for (int i= lib.getInt(Integer.parseInt(ids[songNumber]),"LineMin"); i < lib.getInt(Integer.parseInt(ids[songNumber]),"LineMax"); i++) {
+      for (int i= lib.getInt(int(ids[songNumber]),"LineMin"); i < lib.getInt(int(ids[songNumber]),"LineMax"); i++) {
         if (count >= 10 || hTrails.size() >= 30) {
           break;
         }
-        if (features!=null && features[i]*i/sqrt(features.length)>=lib.getInt(Integer.parseInt(ids[songNumber]),"LineThreshold")) {
-          HorizLine bez = new HorizLine(actual);
+        if (features!=null && features[i]*i/sqrt(features.length)>=lib.getInt(int(ids[songNumber]),"LineThreshold")) {
+          HorizLine bez = new HorizLine(c1,c2);
           hTrails.add(bez);
           count ++;
           break;
