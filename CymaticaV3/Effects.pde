@@ -9,7 +9,7 @@ class BezierTrail {
   BezierTrail(PGraphics img) {
     p = img;
     start = new PVector(random(width), height);
-    end = new PVector(random(width), 0);
+    end = new PVector(width/2, 0);
     control1 = new PVector(random(width), random(height));
     control2 = new PVector(random(width), random(height));
     col = color(random(128, 255), random(128), random(128));

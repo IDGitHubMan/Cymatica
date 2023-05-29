@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
                 g = random.randint(0, 255)
                 b = random.randint(0, 255)
                 writer.writerow([a.tag.title, fname[0], os.path.join(
-                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
+                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, 0, 1, 1, 0, 20, 40, 50, 100, 10, 50, 100, 10])
         else:
             with open(os.path.join(here, 'data/library.csv'), "a") as library:
                 writer = csv.writer(library, delimiter=',', quotechar='"')
@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
                 g = random.randint(0, 255)
                 b = random.randint(0, 255)
                 writer.writerow([fname[0][fname[0].rindex("/"): -4], fname[0], os.path.join(
-                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, False, False, False, 0, 20, 40, 50, 100, 100, 50, 100, 100])
+                    here, 'data/Library/Music' + fname[0][fname[0].rindex("/"): len(fname[0])]), a.tag.album, a.tag.artist, a.tag.genre, "", r, g, b, 255, 255-r, 255-g, 255-b, 255, 255, 255, 255, 255, 255-r, 255-g, 255-b, 255, r, g, b, 255, 0, 1, 1, 0, 20, 40, 50, 100, 10, 50, 100, 10])
 
 
 app = QApplication(sys.argv)
