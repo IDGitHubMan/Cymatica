@@ -78,7 +78,6 @@ class LaserLine {
   }
 
   void beam() {
-    float m = (p1.y-p2.y)/(p1.x-p2.x);
     strokeCap(ROUND);
     strokeWeight(constrain(map(timer, 0, 15, 50, 0), 0, 50));
     stroke(255, 0, 128, constrain(map(timer, 0, 15, 255, 0), 0, 255));
@@ -88,7 +87,6 @@ class LaserLine {
 
   void beam(PGraphics p){
     p.beginDraw();
-    float m = (p1.y-p2.y)/(p1.x-p2.x);
     p.strokeCap(ROUND);
     p.strokeWeight(constrain(map(timer, 0, 15, 50, 0), 0, 50));
     p.stroke(255, 0, 128, constrain(map(timer, 0, 15, 255, 0), 0, 255));
