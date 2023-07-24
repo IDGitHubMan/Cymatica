@@ -1,10 +1,11 @@
+from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication, QWidget
 import sys
 import json
 import eyed3
 import os
 import csv
-from PyQt6.QtCore import QSize, pyqtSlot
+from PyQt6.QtCore import QSize, pyqtSlot, QProcess
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog
 import shutil
 import random
@@ -49,6 +50,13 @@ class MainWindow(QMainWindow):
         # Set the central widget of the Window.
         self.setCentralWidget(button)
         button.clicked.connect(self.local_add)
+        self.p = QProcess()
+        self.p.start("processing-java",
+                     ["--sketch=/Users/isaiahdesrosiers/Documents/Projects/Cymatica/CymaticaV3", "--run"])
+
+    def closeEvent(self, event) -> None:
+        self.p.kill()
+        return super().closeEvent()
 
     @pyqtSlot()
     def local_add(self):
