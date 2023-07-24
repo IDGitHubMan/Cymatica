@@ -69,12 +69,12 @@ class Player {
       rotator += 0.01;
     }
     if (player == null && ids.length >= 1) {
-      player = new SamplePlayer(ac, sm.sample((String) lib.getString(int(ids[songNumber]), "OrigPath")));
+      player = new SamplePlayer(ac, sm.sample((String) lib.getString(int(ids[songNumber]), "LocalPath")));
       player.setKillListener(
         new Bead() {
         protected void messageReceived(Bead b) {
           player = null;
-          sm.removeSample((String) lib.getString(int(ids[songNumber]), "OrigPath"));
+          sm.removeSample((String) lib.getString(int(ids[songNumber]), "LocalPath"));
           songNumber += 1;
           if (songNumber >= ids.length) {
             songNumber = 0;
@@ -198,10 +198,10 @@ class Player {
                 float fftVal = features[i]*i/sqrt(features.length);
                 if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1) {
                   actual.strokeWeight(1);
-                  actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(lRMS, 0, 1, 1, height) * x, height / 2 + map(lRMS, 0, 1, 1, height) * y);
+                  actual.line(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2-2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y, width / 2 - 2 + map(lRMS, 0, 1, 1, height) * x, height / 2-2 + map(lRMS, 0, 1, 1, height) * y);
                 } else {
                   actual.strokeWeight(3);
-                  actual.point(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
+                  actual.point(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2-2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
                 }
               }
             }
@@ -222,7 +222,7 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                actual.vertex(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
+                actual.vertex(width / 2 - 2 + (fftVal + map(lRMS, 0, 1, 1, height)) * x, height / 2-2 + (fftVal + map(lRMS, 0, 1, 1, height)) * y);
               }
             }
           }
@@ -240,10 +240,10 @@ class Player {
                 float fftVal = features[i]*i/sqrt(features.length);
                 if (settings.getJSONObject("irisSettings").getInt("shapeType") == 1) {
                   actual.strokeWeight(1);
-                  actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2 + map(rRMS, 0, 1, 1, height) * y);
+                  actual.line(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 +2+ (fftVal + map(rRMS, 0, 1, 1, height)) * y, width / 2 + 2 + map(rRMS, 0, 1, 1, height) * x, height / 2+2 + map(rRMS, 0, 1, 1, height) * y);
                 } else {
                   actual.strokeWeight(3);
-                  actual.point(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
+                  actual.point(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2+2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
                 }
               }
             }
@@ -264,7 +264,7 @@ class Player {
                 float x = cos(angle);
                 float y = sin(angle);
                 float fftVal = features[i]*i/sqrt(features.length);
-                actual.vertex(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
+                actual.vertex(width / 2 + 2 + (fftVal + map(rRMS, 0, 1, 1, height)) * x, height / 2+2 + (fftVal + map(rRMS, 0, 1, 1, height)) * y);
               }
             }
           }
