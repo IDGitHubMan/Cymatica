@@ -3,8 +3,10 @@ class Player{
     PGraphics actual;
     JSONObject setting;
     Table lib;
+    BufferedReader reader;
     File settingJSON = new File(dataPath("") + "/states.json");
     File libraryCSV = new File(dataPath("") + "/library.csv");
+    File songList = new File(sketchPath() + "/data/queue.txt");
     
     Player(PApplet s) {
         sketch = s;
@@ -69,6 +71,9 @@ class Player{
             t.addColumn("sparkThreshold");
             saveTable(t,"data/library.csv");
             lib = loadTable("library.csv", "header");
+        }
+        if(songList.exists()) {
+            
         }
     }
 }
