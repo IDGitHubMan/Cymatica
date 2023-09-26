@@ -14,8 +14,8 @@ Upon this, the offshoot sketch will be deleted.
 Right now, there are 4 sketches:
 
 - Cymatica (The version built with Minim and Controlp5)
-- Cymaticav2 (The version being built with Beads and G4P)
-- Cymatica V4 (The most recent version, using Beads and hoping to get Qt working.)
+- Cymaticav3 (A version attempting to use Python's pyqt6)
+- Cymatica V4 (The most recent version, using Beads and hoping to get Qt working with Java.)
 - Spotify Test (A test of using spotify data for visualizers)
 
 To come:
