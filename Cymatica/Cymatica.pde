@@ -19,7 +19,7 @@ String path;
 
 //For now, the program automatically runs fullscreen on the second available display.
 void settings() {
-  fullScreen(P3D);
+  fullScreen();
 }
 
 void setup() {
